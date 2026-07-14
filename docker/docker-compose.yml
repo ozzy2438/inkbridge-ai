@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://inkbridge:inkbridge@postgres:5432/inkbridge
+      - MODEL_CACHE_DIR=/app/model_cache
+      - LOG_LEVEL=INFO
+    volumes:
+      - model_cache:/app/model_cache
+      - upload_storage:/app/uploads
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: celery -A src.pipeline.batch_processor worker --loglevel=info --concurrency=2
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://inkbridge:inkbridge@postgres:5432/inkbridge
+      - MODEL_CACHE_DIR=/app/model_cache
+    volumes:
+      - model_cache:/app/model_cache
+      - upload_storage:/app/uploads
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=inkbridge
+      - POSTGRES_PASSWORD=inkbridge
+      - POSTGRES_DB=inkbridge
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  label-studio:
+    image: heartexlabs/label-studio:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
+      - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/label-studio/files
+    volumes:
+      - label_studio_data:/label-studio/data
+      - upload_storage:/label-studio/files
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../configs/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  model_cache:
+  upload_storage:
+  redis_data:
+  postgres_data:
+  label_studio_data:
+  grafana_data:

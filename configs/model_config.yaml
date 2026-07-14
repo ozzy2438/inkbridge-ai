@@ -1,0 +1,53 @@
+# Model Configuration
+model:
+  # Primary OCR model
+  trocr:
+    base_model: "microsoft/trocr-base-handwritten"
+    finetuned_path: "./checkpoints/trocr-finetuned-v1"
+    device: "auto"  # auto, cuda, cpu
+    beam_width: 4
+    max_length: 128
+    use_fp16: true
+    batch_size: 16
+    
+    # Confidence thresholds
+    confidence_threshold: 0.7  # Below this -> uncertain
+    abstention_threshold: 0.4  # Below this -> unreadable
+    auto_accept_threshold: 0.95  # Above this -> no review needed
+
+  # VLM fallback
+  vlm:
+    model_name: "Qwen/Qwen2-VL-2B-Instruct"
+    backend: "local"  # local or api
+    max_tokens: 4096
+    temperature: 0.1
+    
+    # API settings (when backend=api)
+    api_base_url: "https://api.openai.com/v1"
+    # api_key: set via INKBRIDGE_VLM_API_KEY env var
+
+# Pipeline Configuration
+pipeline:
+  quality_gate:
+    blur_threshold: 100.0
+    min_resolution: 640
+    max_skew_degrees: 15.0
+    auto_correct_skew: true
+    
+  layout_analysis:
+    min_line_height: 15
+    max_line_height: 200
+    crossed_out_detection: true
+    
+  confidence_router:
+    quality_threshold: 0.6
+    complexity_threshold: 5
+    vlm_cost_per_page: 0.01
+    trocr_cost_per_line: 0.0001
+
+# Monitoring
+monitoring:
+  prometheus_enabled: true
+  sentry_dsn: null  # Set via SENTRY_DSN env var
+  log_level: "INFO"
+  structured_logging: true

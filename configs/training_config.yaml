@@ -1,0 +1,94 @@
+# Training Configuration
+training:
+  trocr:
+    base_model: "microsoft/trocr-base-handwritten"
+    output_dir: "./checkpoints/trocr-finetuned"
+    
+    # Hyperparameters
+    learning_rate: 5.0e-5
+    weight_decay: 0.0005
+    num_epochs: 15
+    batch_size: 32
+    gradient_accumulation_steps: 2
+    warmup_steps: 500
+    max_grad_norm: 1.0
+    lr_scheduler_type: "cosine"
+    
+    # Generation
+    max_length: 128
+    beam_width: 4
+    
+    # Training settings
+    fp16: true
+    dataloader_num_workers: 4
+    eval_steps: 500
+    save_steps: 1000
+    save_total_limit: 3
+    early_stopping_patience: 5
+    
+    # Augmentation
+    augmentation:
+      enabled: true
+      probability: 0.5
+      blur_prob: 0.3
+      rotation_prob: 0.3
+      noise_prob: 0.2
+      jpeg_prob: 0.2
+      color_jitter_prob: 0.3
+
+  # DPO alignment (optional)
+  dpo:
+    enabled: false
+    beta: 0.1
+    learning_rate: 1.0e-6
+    num_epochs: 3
+    batch_size: 4
+
+# Data Configuration
+data:
+  # Writer-independent split ratios
+  split:
+    train: 0.70
+    val: 0.15
+    test: 0.15
+    seed: 42
+    min_samples_per_writer: 3
+  
+  # Dataset sources
+  datasets:
+    iam:
+      path: "./data/raw/iam"
+      enabled: true
+      purpose: "baseline_benchmark"
+    
+    smhd:
+      path: "./data/raw/smhd"
+      enabled: true
+      purpose: "student_essays_crossouts"
+      license: "CC-BY-NC"
+    
+    gnhk:
+      path: "./data/raw/gnhk"
+      enabled: true
+      purpose: "camera_captured_handwriting"
+    
+    augmented:
+      enabled: true
+      purpose: "robustness_training"
+      augmentations:
+        - blur
+        - shadow
+        - glare
+        - rotation
+        - jpeg_damage
+        - partial_crop
+
+# Active Learning
+active_learning:
+  uncertainty_weight: 0.4
+  frequency_weight: 0.2
+  impact_weight: 0.3
+  cost_weight: 0.1
+  min_confidence_for_auto: 0.95
+  max_queue_size: 1000
+  batch_size: 20

@@ -1,0 +1,49 @@
+name: Model Evaluation
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_version:
+        description: 'Model version to evaluate'
+        required: true
+      test_set:
+        description: 'Test set (gold, iam, gnhk, smhd)'
+        required: true
+        default: 'gold'
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+      
+      - name: Download model
+        run: |
+          python scripts/download_models.py --version ${{ inputs.model_version }}
+      
+      - name: Run evaluation
+        run: |
+          python scripts/run_evaluation.py \
+            --model-version ${{ inputs.model_version }} \
+            --test-set ${{ inputs.test_set }} \
+            --output-dir ./evaluation_results
+      
+      - name: Check release gate
+        run: |
+          python scripts/check_release_gate.py \
+            --results-dir ./evaluation_results \
+            --model-version ${{ inputs.model_version }}
+      
+      - name: Upload evaluation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-report-${{ inputs.model_version }}
+          path: ./evaluation_results/
