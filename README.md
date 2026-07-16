@@ -1,13 +1,29 @@
-# InkBridge AI — Production Handwriting Intelligence & ModelOps Platform
+# InkBridge AI — Handwriting Intelligence & ModelOps Prototype
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-green.svg)](https://github.com/features/actions)
+[![CI](https://github.com/ozzy2438/inkbridge-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/ozzy2438/inkbridge-ai/actions/workflows/ci.yml)
 
-> Converts photographed, scanned, or PDF student handwriting into layout-preserved, confidence-scored, auditable digital transcripts — with human-in-the-loop review for enterprise reliability.
+> An evidence-first prototype for converting photographed and scanned handwriting into layout-aware, confidence-scored transcripts with human review.
 
-![Architecture Overview](docs/assets/architecture_overview.png)
+## Project status
+
+InkBridge AI is currently an **alpha research and engineering prototype**, not a
+production deployment. The repository contains a baseline TrOCR inference path,
+heuristic image-quality and layout components, API scaffolding, evaluation metric
+definitions, and annotation workflow design.
+
+The following claims are intentionally deferred until reproducible artifacts exist:
+
+- domain fine-tuning improvements
+- calibrated auto-accept or abstention thresholds
+- latency, throughput, and cost targets
+- asynchronous class-set processing
+- production privacy, retention, audit, and tenant-isolation controls
+- reviewer-time reduction and pilot outcomes
+
+Measured results will be published only with the dataset manifest, split report,
+configuration, model version, and evaluation artifact needed to reproduce them.
 
 ## 🎯 Problem Statement
 
@@ -18,9 +34,11 @@ Education and assessment organizations receive handwritten student work as photo
 - Mixed printed questions and student handwriting
 - Multiple handwriting styles and difficulty levels
 
-**InkBridge AI** solves the real business problem: reducing the human time needed to digitize and verify a class set from ~45 minutes to ~15 minutes.
+**InkBridge AI** targets the real business problem: reducing the human time needed
+to digitize and verify a class set. The initial 45-to-15-minute objective is a pilot
+hypothesis and has not yet been validated.
 
-## 🏗️ Architecture
+## 🏗️ Target architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -61,7 +79,10 @@ Education and assessment organizations receive handwritten student work as photo
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 Quick Start
+The diagram describes the target system. The current repository does not yet include
+durable job storage, a working review queue, or the complete active-learning loop.
+
+## 🚀 Development setup
 
 ```bash
 # Clone the repository
@@ -75,15 +96,18 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 # Install dependencies
 pip install -e ".[dev]"
 
-# Download model weights
+# Download public baseline model weights
 python scripts/download_models.py
 
 # Run the API server
 uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 
-# Run with Docker
-docker-compose up --build
+# Run the development stack
+docker compose -f docker/docker-compose.yml up --build
 ```
+
+The single-image endpoint is the current integration focus. PDF conversion and the
+batch workflow are not yet end-to-end complete.
 
 ## 📁 Project Structure
 
@@ -93,7 +117,7 @@ inkbridge-ai/
 │   ├── api/                    # FastAPI application
 │   │   ├── main.py             # Application entry point
 │   │   ├── routes/             # API route handlers
-│   │   ├── middleware/         # Auth, logging, rate limiting
+│   │   ├── middleware/         # Request logging (auth/rate limiting planned)
 │   │   └── schemas/            # Pydantic models
 │   ├── pipeline/               # Core ML pipeline
 │   │   ├── quality_gate.py     # Image quality assessment
@@ -101,41 +125,30 @@ inkbridge-ai/
 │   │   ├── confidence_router.py # Route to appropriate model
 │   │   ├── ocr_engine.py       # TrOCR inference
 │   │   └── vlm_fallback.py     # VLM for hard pages
-│   ├── models/                 # Model definitions
-│   │   ├── trocr_finetuned.py  # Fine-tuned TrOCR
-│   │   ├── vlm_structured.py   # VLM structured output
-│   │   └── model_registry.py   # Version management
+│   ├── models/                 # Model metadata
+│   │   └── model_registry.py   # Prototype version management
 │   ├── training/               # Training pipelines
 │   │   ├── finetune_trocr.py   # TrOCR fine-tuning
-│   │   ├── sft_vlm.py          # VLM supervised fine-tuning
-│   │   ├── dpo_alignment.py    # DPO preference training
 │   │   └── active_learning.py  # Active learning loop
 │   ├── evaluation/             # Evaluation framework
 │   │   ├── metrics.py          # CER, WER, calibration
-│   │   ├── failure_atlas.py    # Failure categorization
-│   │   ├── regression_tests.py # Model release gate
-│   │   └── benchmarks.py       # Latency/cost benchmarks
+│   │   └── failure_atlas.py    # Failure categorization
 │   ├── data/                   # Data processing
 │   │   ├── datasets.py         # Dataset loaders
-│   │   ├── preprocessing.py    # Image preprocessing
 │   │   ├── augmentation.py     # Data augmentation
 │   │   └── writer_split.py     # Writer-independent splits
 │   ├── labeling/               # Annotation operations
-│   │   ├── label_studio_config.py
-│   │   ├── annotation_guidelines.py
-│   │   └── quality_metrics.py
+│   │   └── label_studio_config.py
 │   └── export/                 # Output formatting
-│       ├── transcript.py       # Text/JSON/DOCX export
-│       └── lms_integration.py  # LMS API export
+│       └── transcript.py       # Prototype JSON/TXT/DOCX/LMS formatting
 ├── configs/                    # Configuration files
 │   ├── model_config.yaml
 │   ├── training_config.yaml
-│   ├── evaluation_config.yaml
-│   └── deployment_config.yaml
+│   └── evaluation_config.yaml
 ├── tests/                      # Test suite
 │   ├── unit/
-│   ├── integration/
-│   └── regression/
+│   ├── integration/            # Planned test coverage
+│   └── regression/             # Planned model regression coverage
 ├── scripts/                    # Utility scripts
 │   ├── download_models.py
 │   ├── prepare_datasets.py
@@ -149,23 +162,15 @@ inkbridge-ai/
 │   ├── terraform/
 │   └── kubernetes/
 ├── notebooks/                  # Research notebooks
-│   ├── 01_baseline_evaluation.ipynb
-│   ├── 02_fine_tuning_trocr.ipynb
-│   ├── 03_vlm_structured_output.ipynb
-│   ├── 04_confidence_calibration.ipynb
-│   └── 05_quantization_benchmark.ipynb
+│   └── 01_baseline_evaluation.ipynb
 ├── docs/                       # Documentation
-│   ├── model_card.md
-│   ├── evaluation_report.md
 │   ├── annotation_guidelines.md
-│   ├── api_documentation.md
-│   └── deployment_guide.md
+│   └── model_card.md
 ├── pyproject.toml
 ├── Makefile
 └── .github/workflows/          # CI/CD
     ├── ci.yml
-    ├── model_evaluation.yml
-    └── deploy.yml
+    └── model_evaluation.yml
 ```
 
 ## 📊 Datasets
@@ -173,30 +178,33 @@ inkbridge-ai/
 | Dataset | Purpose | Size | License |
 |---------|---------|------|---------|
 | [IAM Handwriting Database](https://fki.tic.heia-fr.ch/databases/iam-handwriting-database) | Standard benchmark & baseline | 13,353 lines, 657 writers | Research |
-| [SMHD](https://github.com/hiqmatNisa/SMHD) | Student essays, cross-outs, corrections | 500+ students, essays & math | CC BY-NC |
-| [GNHK](https://www.goodnotes.com/gnhk) | Camera-captured, varied conditions | 687 images, 9,363 lines | Research |
+| [SMHD](https://doi.org/10.25439/rmt.24312715.v1) | Student essays, cross-outs, corrections | 500+ students, essays & math | CC BY-NC 4.0 |
+| [GNHK](https://github.com/GoodNotes/GNHK-dataset) | Camera-captured, varied conditions | 687 images, 9,363 lines | CC BY 4.0 |
 | Synthetic Augmented | Blur, shadow, glare, rotation | Generated on-the-fly | N/A |
 | Consented Pilot Set | Production-like evaluation | TBD (pilot phase) | Private |
 
 ## 🔬 Model Architecture
 
-### Primary: Fine-tuned TrOCR
+### Current baseline: pretrained TrOCR
 - Base: `microsoft/trocr-base-handwritten`
-- Fine-tuned on SMHD + GNHK + augmented data
-- Writer-independent train/test split
-- Confidence scoring via token-level log probabilities
+- Domain fine-tuning is planned; no fine-tuned checkpoint is published yet
+- Writer-independent splitting is implemented as a utility but is not yet wired into data preparation
+- Confidence calibration and threshold selection remain evaluation work
 
-### Fallback: Compact VLM
+### Prototype fallback: compact VLM
 - Structured JSON output with bounding boxes
 - Handles full-page layout understanding
-- Routes only for hard pages (saves cost)
+- Routing and output-schema fidelity have not yet been benchmarked
 
-### Optimization Pipeline
-- FP16 → INT8 → ONNX Runtime
-- Dynamic batching for throughput
-- Distillation experiments
+### Planned optimization pipeline
+- FP16 → INT8 → ONNX Runtime comparison
+- Dynamic batching benchmark
+- Distillation experiments gated on measured quality, latency, and cost
 
-## 📈 Evaluation Metrics
+## 📈 Evaluation contract
+
+These are the target metrics. The repository does not yet contain a completed
+evaluation report.
 
 | Category | Metrics |
 |----------|--------|
@@ -207,19 +215,18 @@ inkbridge-ai/
 | Production | p50/p95 Latency, Pages/Min, Cost/Page |
 | Edge Cases | Blur, Cursive, Cross-outs, Insertions |
 
-## 🛡️ Privacy & Safety
+## 🛡️ Privacy and safety requirements
 
-- No student names logged
-- Uploaded documents auto-deleted after processing
-- Demo uses only licensed/synthetic examples
-- Model abstains when uncertain (no silent hallucination)
-- Audit trail for all predictions
-- GDPR/privacy-by-design compliant
+- Use only licensed, synthetic, or explicitly consented and de-identified examples
+- Do not use uploaded data for training without explicit authorization
+- Implement and verify retention, deletion, access control, audit logging, and tenant isolation before a pilot
+- Calibrate abstention before enabling automatic acceptance
+- Do not represent the prototype as GDPR- or production-compliant without a formal assessment
 
 ## 📋 Roadmap
 
-- [x] Week 1-2: Problem discovery, data governance, baselines
-- [x] Week 3-4: Quality gate, layout segmentation, TrOCR baseline
+- [ ] Week 1-2: Problem discovery, data governance, locked gold set, baselines **(in progress)**
+- [ ] Week 3-4: Quality gate, layout segmentation, TrOCR baseline **(prototype implemented; validation pending)**
 - [ ] Week 5-6: Domain fine-tuning, failure analysis, calibration
 - [ ] Week 7: VLM fallback & structured JSON SFT
 - [ ] Week 8: Label Studio, annotation workflow, active learning
