@@ -19,7 +19,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-      
+
+      - name: Validate GitHub Actions workflows
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
