@@ -333,7 +333,8 @@ def _decode_png(content: bytes, *, width: int, height: int, context: str) -> Ima
 
 def _encode_pgm(image: Image.Image) -> bytes:
     width, height = image.size
-    return f"P5\n{width} {height}\n255\n".encode("ascii") + image.tobytes()
+    pixels = cast(bytes, image.tobytes())
+    return f"P5\n{width} {height}\n255\n".encode("ascii") + pixels
 
 
 def _bbox(
