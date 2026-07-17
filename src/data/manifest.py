@@ -9,7 +9,7 @@ from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import urlparse
 
 from src.data.writer_split import create_writer_split
@@ -23,6 +23,7 @@ class DatasetIdentity:
     version: str
     license_id: str
     license_url: str
+    sample_type: Literal["line", "page"]
 
     def validate(self) -> None:
         """Reject incomplete provenance before any artifact is written."""
@@ -32,6 +33,8 @@ class DatasetIdentity:
         parsed_url = urlparse(self.license_url)
         if parsed_url.scheme != "https" or not parsed_url.netloc:
             raise ValueError("license_url must be an absolute HTTPS URL")
+        if self.sample_type not in {"line", "page"}:
+            raise ValueError("sample_type must be either 'line' or 'page'")
 
 
 def build_manifest_records(
@@ -56,6 +59,7 @@ def build_manifest_records(
             filename = _required_csv_value(row, "filename", row_number)
             reference = _required_csv_value(row, "text", row_number)
             raw_writer_id = _required_csv_value(row, "writer_id", row_number)
+            slices = _parse_slices(row.get("slices"))
             relative_path = _safe_image_path(filename, row_number)
             if relative_path.as_posix() in seen_filenames:
                 raise ValueError(f"labels.csv row {row_number}: duplicate filename '{filename}'")
@@ -68,7 +72,7 @@ def build_manifest_records(
             sample_id = _stable_digest(identity.name, identity.version, relative_path.as_posix())
             records.append(
                 {
-                    "schema_version": 1,
+                    "schema_version": 2,
                     "sample_id": sample_id,
                     "source_sha256": source_sha256,
                     "image_path": relative_path.as_posix(),
@@ -78,6 +82,8 @@ def build_manifest_records(
                     "dataset_version": identity.version,
                     "license_id": identity.license_id,
                     "license_url": identity.license_url,
+                    "sample_type": identity.sample_type,
+                    "slices": slices,
                 }
             )
 
@@ -134,13 +140,14 @@ def write_split_manifest(
         for split_name, split in split_records.items()
     }
     metadata = {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "dataset": {
             "name": identity.name,
             "version": identity.version,
             "license_id": identity.license_id,
             "license_url": identity.license_url,
+            "sample_type": identity.sample_type,
         },
         "source": {
             "labels_filename": "labels.csv",
@@ -192,6 +199,16 @@ def _safe_image_path(filename: str, row_number: int) -> Path:
     if value.is_absolute() or ".." in value.parts or value.name != filename:
         raise ValueError(f"labels.csv row {row_number}: filename must be a basename inside images/")
     return Path("images") / value
+
+
+def _parse_slices(raw_value: str | None) -> list[str]:
+    """Normalize an optional pipe-delimited slice column."""
+    if raw_value is None or not raw_value.strip():
+        return []
+    slices = sorted({value.strip() for value in raw_value.split("|") if value.strip()})
+    if not slices:
+        return []
+    return slices
 
 
 def _require_contained_file(root: Path, image_path: Path, row_number: int) -> None:

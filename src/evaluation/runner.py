@@ -243,14 +243,18 @@ def evaluate_release_gate(
             baseline_slice, "cer"
         )
     worst_regression = max(regressions.values(), default=0.0)
+    has_required_slices = bool(baseline_slices)
     checks.append(
         {
             **_gate_check(
                 "slice_regression",
                 worst_regression,
                 f"<= {max_slice_regression}",
-                not missing_slices and worst_regression <= max_slice_regression,
+                has_required_slices
+                and not missing_slices
+                and worst_regression <= max_slice_regression,
             ),
+            "required_slices_present": has_required_slices,
             "missing_slices": missing_slices,
             "regressions": regressions,
         }

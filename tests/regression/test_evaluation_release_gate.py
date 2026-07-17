@@ -66,3 +66,18 @@ def test_different_evaluation_set_blocks_release() -> None:
 
     assert gate["passed"] is False
     assert set_check["passed"] is False
+
+
+def test_missing_baseline_slices_blocks_release() -> None:
+    """A slice gate must not pass vacuously when no required slices were defined."""
+    baseline = deepcopy(_artifact("baseline.jsonl", "baseline-v1"))
+    candidate = deepcopy(_artifact("candidate.jsonl", "candidate-v1"))
+    thresholds = load_evaluation_config(CONFIG)["release_gate"]
+    baseline["slices"] = {}
+    candidate["slices"] = {}
+
+    gate = evaluate_release_gate(candidate, baseline, thresholds)
+    slice_check = next(check for check in gate["checks"] if check["name"] == "slice_regression")
+
+    assert gate["passed"] is False
+    assert slice_check["required_slices_present"] is False

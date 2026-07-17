@@ -19,6 +19,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset-version", required=True)
     parser.add_argument("--license-id", required=True)
     parser.add_argument("--license-url", required=True)
+    parser.add_argument("--sample-type", choices=("line", "page"), required=True)
     parser.add_argument("--train-ratio", type=float, default=0.7)
     parser.add_argument("--val-ratio", type=float, default=0.15)
     parser.add_argument("--test-ratio", type=float, default=0.15)
@@ -35,6 +36,7 @@ def main() -> int:
         version=args.dataset_version,
         license_id=args.license_id,
         license_url=args.license_url,
+        sample_type=args.sample_type,
     )
     records = build_manifest_records(args.dataset_dir, identity)
     metadata = write_split_manifest(
