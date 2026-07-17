@@ -113,7 +113,7 @@ def evaluate_records(records: list[EvaluationRecord]) -> dict[str, Any]:
             {
                 "p50_latency_ms": float(np.percentile(latencies, 50)),
                 "p95_latency_ms": float(np.percentile(latencies, 95)),
-                "pages_per_minute": float(60_000 / np.mean(latencies))
+                "samples_per_minute": float(60_000 / np.mean(latencies))
                 if np.mean(latencies) > 0
                 else None,
             }

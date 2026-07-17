@@ -45,8 +45,10 @@ settings, runtime versions, manifest hashes, and output hash are written to
 partial JSONL after every batch, and a compatible retry resumes without reprocessing completed
 samples. `predictions.jsonl` appears only after the selected split is complete.
 
-The producer reports line latency. It does not invent `cost_per_page_usd`: honest page cost requires
-page/essay aggregation and infrastructure pricing, which remain a later measurement step.
+The producer reports line latency. The evaluator therefore derives `samples_per_minute`, where one
+sample means one JSONL record; it must not be described as page throughput when records are lines.
+It does not invent `cost_per_page_usd`: honest page cost requires page/essay aggregation and
+infrastructure pricing, which remain a later measurement step.
 
 ## Run an evaluation
 
@@ -80,6 +82,10 @@ artifact.
 
 The files under `tests/fixtures/evaluation/` are synthetic regression fixtures for the evaluator;
 they are not a model benchmark or a gold dataset.
+
+The captured [OpenHand-Synth TrOCR smoke artifact](../artifacts/smoke/openhand-synth-trocr-base-v1/README.md)
+is separate from those unit fixtures. It contains real pretrained-model outputs, but its six
+synthetic lines remain engineering evidence rather than a student-handwriting benchmark.
 
 ## GitHub Actions
 

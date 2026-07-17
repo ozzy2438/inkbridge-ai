@@ -29,7 +29,7 @@ evaluation:
       - abstention_precision
       - p50_latency_ms
       - p95_latency_ms
-      - pages_per_minute
+      - samples_per_minute
       - cost_per_page_usd
       - per_slice_metrics
     planned:
@@ -51,7 +51,7 @@ evaluation:
     min_valid_output_rate: 1.0  # 100% valid JSON output
     
     # Latency limits
-    max_p95_latency_ms: 5000  # 5 seconds per page
+    max_p95_latency_ms: 5000  # 5 seconds per evaluated sample
     
     # Hallucination control
     max_false_confidence_rate: 0.05  # <5% high-confidence errors

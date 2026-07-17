@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import platform
 import re
 from copy import deepcopy
 from importlib.metadata import version
@@ -67,6 +68,10 @@ class TrOCRPredictionBackend:
             "confidence_threshold": confidence_threshold,
             "abstention_threshold": abstention_threshold,
             "runtime": {
+                "python": platform.python_version(),
+                "os": platform.system(),
+                "os_release": platform.release(),
+                "machine": platform.machine(),
                 "torch": torch.__version__,
                 "transformers": version("transformers"),
                 "huggingface_hub": version("huggingface-hub"),

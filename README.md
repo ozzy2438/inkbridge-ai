@@ -219,9 +219,14 @@ generation. Synthetic smoke results are plumbing evidence, not student-handwriti
 The offline evaluator validates prediction JSONL artifacts, hashes its inputs, and computes the
 implemented metrics below. A separate producer can now capture pretrained TrOCR predictions from a
 licensed line-level manifest. The repository still has no real model
-benchmark report because a locked, writer-isolated gold set and captured baseline
-predictions have not yet been published. See the [evaluation contract](docs/evaluation.md)
-for the input schema and release-gate workflow.
+benchmark report because a locked, writer-isolated real handwriting gold set has not yet been
+published. See the [evaluation contract](docs/evaluation.md) for the input schema and release-gate
+workflow.
+
+The repository does contain one
+[captured synthetic TrOCR smoke result](artifacts/smoke/openhand-synth-trocr-base-v1/README.md)
+that proves the pipeline runs end to end. Its six generated name/date lines are deliberately
+excluded from benchmark claims.
 
 | Category | Metrics |
 |----------|--------|
@@ -229,7 +234,7 @@ for the input schema and release-gate workflow.
 | Layout | Region F1, Reading Order Accuracy **(planned)** |
 | Reliability | Calibration Error, False-Confidence Rate |
 | Operations | Correction Minutes/Page, Auto-Accept Rate **(planned)** |
-| Production | p50/p95 Latency, Pages/Min, Cost/Page |
+| Production | p50/p95 Sample Latency; Page Throughput and Cost/Page **(planned)** |
 | Edge Cases | Blur, Cursive, Cross-outs, Insertions |
 
 ## 🛡️ Privacy and safety requirements

@@ -1,0 +1,177 @@
+{
+  "config": {
+    "filename": "evaluation_config.yaml",
+    "sha256": "e1e8e4dedf2d0b93bcd1e08ea629310147cb313b184efa469339ac10eefaf82d"
+  },
+  "generated_at": "2026-07-17T11:19:01.748449+00:00",
+  "input": {
+    "evaluation_set_sha256": "9b062c7b4e6bc2a496f826b8b136e6816f0c9e3c85ec659f5118937a8342a099",
+    "filename": "predictions.jsonl",
+    "num_records": 6,
+    "sha256": "b60d398794255293cab3c6075e3033a91c34c077ff4e22c33ed5fd81b1787995"
+  },
+  "metrics": {
+    "abstention_metrics": {
+      "abstention_rate": 0.0,
+      "correct_abstentions": 0.0,
+      "unnecessary_abstentions": 0.0
+    },
+    "calibration_error": 0.5294262866179149,
+    "cer": 0.05555555555555555,
+    "false_confidence_rate": 0.6666666666666666,
+    "mean_confidence": 0.8627596199512482,
+    "normalized_edit_distance": 0.06127498232761391,
+    "num_samples": 6,
+    "p50_latency_ms": 1208.2162080005219,
+    "p95_latency_ms": 1347.1620000000257,
+    "samples_per_minute": 49.56208030016153,
+    "valid_output_rate": 1.0,
+    "wer": 0.5
+  },
+  "model_version": "microsoft-trocr-base-handwritten-eaacaf452b06415df8f10bb6fad3a4c11e609406",
+  "schema_version": 1,
+  "slices": {
+    "ink_color_black": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.6522028803825379,
+      "cer": 0.06756756756756757,
+      "false_confidence_rate": 1.0,
+      "mean_confidence": 0.8522028803825379,
+      "normalized_edit_distance": 0.07352997879313669,
+      "num_samples": 5,
+      "wer": 0.5833333333333334
+    },
+    "ink_color_green": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.0844566822052002,
+      "cer": 0.0,
+      "false_confidence_rate": 0.0,
+      "mean_confidence": 0.9155433177947998,
+      "normalized_edit_distance": 0.0,
+      "num_samples": 1,
+      "wer": 0.0
+    },
+    "neatness_high": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.16778665781021118,
+      "cer": 0.0,
+      "false_confidence_rate": 0.0,
+      "mean_confidence": 0.8322133421897888,
+      "normalized_edit_distance": 0.0,
+      "num_samples": 1,
+      "wer": 0.0
+    },
+    "neatness_low": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.9088160395622253,
+      "cer": 0.07692307692307693,
+      "false_confidence_rate": 1.0,
+      "mean_confidence": 0.9088160395622253,
+      "normalized_edit_distance": 0.07417582417582418,
+      "num_samples": 2,
+      "wer": 0.6
+    },
+    "neatness_mid": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.5089040994644165,
+      "cer": 0.06818181818181818,
+      "false_confidence_rate": 0.5,
+      "mean_confidence": 0.8422374327977499,
+      "normalized_edit_distance": 0.07309941520467836,
+      "num_samples": 3,
+      "wer": 0.8
+    },
+    "no_noise": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.5499484737714131,
+      "cer": 0.043478260869565216,
+      "false_confidence_rate": 1.0,
+      "mean_confidence": 0.8832818071047465,
+      "normalized_edit_distance": 0.04945054945054945,
+      "num_samples": 3,
+      "wer": 0.3333333333333333
+    },
+    "noise_augmented": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.5089040994644165,
+      "cer": 0.06818181818181818,
+      "false_confidence_rate": 0.5,
+      "mean_confidence": 0.8422374327977499,
+      "normalized_edit_distance": 0.07309941520467836,
+      "num_samples": 3,
+      "wer": 0.8
+    },
+    "source_faker_date": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.6098741094271342,
+      "cer": 0.06976744186046512,
+      "false_confidence_rate": 1.0,
+      "mean_confidence": 0.8313496708869934,
+      "normalized_edit_distance": 0.07936507936507936,
+      "num_samples": 3,
+      "wer": 0.625
+    },
+    "source_faker_name": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.5608362356821696,
+      "cer": 0.0425531914893617,
+      "false_confidence_rate": 0.5,
+      "mean_confidence": 0.8941695690155029,
+      "normalized_edit_distance": 0.043184885290148446,
+      "num_samples": 3,
+      "wer": 0.3333333333333333
+    },
+    "synthetic": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.5294262866179149,
+      "cer": 0.05555555555555555,
+      "false_confidence_rate": 0.6666666666666666,
+      "mean_confidence": 0.8627596199512482,
+      "normalized_edit_distance": 0.06127498232761391,
+      "num_samples": 6,
+      "wer": 0.5
+    }
+  },
+  "status": "evaluated",
+  "test_set": "openhand-synth-smoke-test-v1"
+}

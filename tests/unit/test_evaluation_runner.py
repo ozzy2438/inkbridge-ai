@@ -35,6 +35,21 @@ def test_evaluation_artifact_is_traceable_and_sliced() -> None:
     assert set(artifact["slices"]) == {"clean", "cursive", "faint_pencil", "print"}
 
 
+def test_latency_throughput_is_labelled_per_sample() -> None:
+    """Line records must never be misrepresented as page throughput."""
+    records = load_evaluation_records(FIXTURES / "candidate.jsonl")
+    artifact = build_evaluation_artifact(
+        records,
+        model_version="candidate-v1",
+        test_set="synthetic-regression",
+        input_path=FIXTURES / "candidate.jsonl",
+        config_path=CONFIG,
+    )
+
+    assert artifact["metrics"]["samples_per_minute"] > 0
+    assert "pages_per_minute" not in artifact["metrics"]
+
+
 def test_partial_optional_metric_is_rejected(tmp_path: Path) -> None:
     """Partial latency coverage must not produce a biased operational metric."""
     input_path = tmp_path / "partial.jsonl"
