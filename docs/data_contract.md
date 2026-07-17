@@ -61,6 +61,46 @@ python -m scripts.build_dataset_manifest \
   --test-ratio 0.2
 ```
 
+## Public real-handwriting smoke subset
+
+The CSAFE adapter is the first real-handwriting checkpoint. It reads only nine explicitly selected
+adult writers' Session 1 PHR pages from the official Figshare archive and publishes 19 deterministic
+line crops. The source article and its CC BY 4.0 licence, README, archive, ZIP entries, page images,
+crop boxes, references, and output bytes are all pinned. Metadata or content drift causes a hard
+failure before `labels.csv` or `source.meta.json` is published.
+
+```bash
+python -m scripts.prepare_csafe_smoke_subset \
+  --output-dir data/processed/csafe-real-handwriting-smoke
+```
+
+The adapter uses HTTP range requests, so it does not download the full multi-gigabyte Session 1
+archive. It exports only grayscale line crops, not source pages. The normalized output records the
+official citation and licence in `ATTRIBUTION.md`, and identifies source writers only by the
+dataset's participant IDs. Keep the attribution with any redistributed derivative.
+
+This set is real adult handwriting, but its line references were split from the known PHR prompt
+after one visual pass. It is therefore a pipeline smoke test—not a gold benchmark, not student or
+child handwriting, and not evidence of classroom accuracy. An independent human transcription and
+crop-boundary review is required before promoting any examples into a gold evaluation set.
+
+To build a writer-isolated manifest after preparation:
+
+```bash
+python -m scripts.build_dataset_manifest \
+  --dataset-dir data/processed/csafe-real-handwriting-smoke \
+  --output-dir data/processed/csafe-real-handwriting-smoke \
+  --dataset-name csafe-real-handwriting-smoke \
+  --dataset-version figshare-10062203-v2-selection-v1 \
+  --license-id CC-BY-4.0 \
+  --license-url https://creativecommons.org/licenses/by/4.0/ \
+  --sample-type line \
+  --train-ratio 0.6 \
+  --val-ratio 0.2 \
+  --test-ratio 0.2 \
+  --min-samples-per-writer 1
+```
+
 ## Build the manifest
 
 ```bash
