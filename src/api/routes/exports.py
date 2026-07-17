@@ -1,9 +1,9 @@
 """Export endpoints — TXT, JSON, DOCX, LMS formats."""
 
+import io
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from typing import Optional
-import io
 
 router = APIRouter()
 
@@ -16,7 +16,7 @@ async def export_transcript(
     include_confidence: bool = True,
 ):
     """Export transcription results in various formats.
-    
+
     Formats:
     - json: Structured JSON with blocks, confidence, and metadata
     - txt: Plain text preserving reading order
@@ -24,9 +24,9 @@ async def export_transcript(
     - lms: LMS-compatible API format (Moodle, Canvas, etc.)
     """
     from src.export.transcript import TranscriptExporter
-    
+
     exporter = TranscriptExporter()
-    
+
     try:
         content, content_type, filename = await exporter.export(
             job_id=job_id,
@@ -38,7 +38,7 @@ async def export_transcript(
         raise HTTPException(status_code=400, detail=str(e))
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Job not found")
-    
+
     return StreamingResponse(
         io.BytesIO(content),
         media_type=content_type,

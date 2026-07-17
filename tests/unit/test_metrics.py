@@ -1,13 +1,10 @@
 """Unit tests for evaluation metrics."""
 
-import pytest
 from src.evaluation.metrics import (
     character_error_rate,
-    word_error_rate,
-    normalized_edit_distance,
-    calibration_error,
-    false_confidence_rate,
     compute_full_metrics,
+    false_confidence_rate,
+    word_error_rate,
 )
 
 
@@ -55,7 +52,7 @@ def test_compute_full_metrics():
     preds = ["hello world"]
     refs = ["hello world"]
     metrics = compute_full_metrics(preds, refs)
-    
+
     assert "cer" in metrics
     assert "wer" in metrics
     assert "normalized_edit_distance" in metrics

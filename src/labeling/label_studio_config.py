@@ -10,20 +10,20 @@ Sets up Label Studio for handwriting annotation:
 LABEL_STUDIO_CONFIG_XML = """
 <View>
   <Header value="InkBridge AI - Handwriting Transcription" />
-  
+
   <View style="display: flex; gap: 20px;">
     <!-- Image panel -->
     <View style="flex: 1;">
       <Image name="image" value="$image" zoom="true" rotateControl="true" />
     </View>
-    
+
     <!-- Annotation panel -->
     <View style="flex: 1;">
       <Header value="Transcription" size="4" />
-      <TextArea name="transcription" toName="image" 
-               rows="6" editable="true" 
+      <TextArea name="transcription" toName="image"
+               rows="6" editable="true"
                placeholder="Type the transcription here..." />
-      
+
       <Header value="Region Type" size="4" />
       <Choices name="region_type" toName="image" choice="single">
         <Choice value="student_handwriting" />
@@ -33,7 +33,7 @@ LABEL_STUDIO_CONFIG_XML = """
         <Choice value="teacher_annotation" />
         <Choice value="unreadable" />
       </Choices>
-      
+
       <Header value="Quality Flags" size="4" />
       <Choices name="quality_flags" toName="image" choice="multiple">
         <Choice value="blur" />
@@ -42,12 +42,12 @@ LABEL_STUDIO_CONFIG_XML = """
         <Choice value="mixed_languages" />
         <Choice value="mathematical_notation" />
       </Choices>
-      
+
       <Header value="Confidence" size="4" />
       <Rating name="annotator_confidence" toName="image" maxRating="5" />
     </View>
   </View>
-  
+
   <!-- Bounding box annotations -->
   <RectangleLabels name="bbox" toName="image">
     <Label value="text_line" background="#2196F3" />

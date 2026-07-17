@@ -4,7 +4,7 @@ WORKDIR /app
 
 # System dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
@@ -12,18 +12,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Python dependencies
-COPY pyproject.toml .
-RUN pip install --no-cache-dir -e ".[dev]"
-
-# Application code
+# Package metadata and application code must be present before building the wheel.
+COPY pyproject.toml README.md ./
 COPY src/ src/
+RUN pip install --no-cache-dir .
+
 COPY configs/ configs/
 COPY scripts/ scripts/
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)" || exit 1
 
 EXPOSE 8000
 

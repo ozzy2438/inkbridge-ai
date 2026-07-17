@@ -8,9 +8,8 @@ Handles class-set batch uploads:
 - Webhook notifications
 """
 
-import uuid
 from datetime import datetime
-from typing import Optional
+
 import structlog
 
 logger = structlog.get_logger()
@@ -22,12 +21,12 @@ _jobs: dict = {}
 
 class BatchProcessor:
     """Manages batch transcription jobs."""
-    
+
     async def queue_batch(
         self,
         job_id: str,
         files: list,
-        webhook_url: Optional[str] = None,
+        webhook_url: str | None = None,
         priority: str = "normal",
     ) -> int:
         """Queue a batch of pages for processing."""
@@ -44,25 +43,25 @@ class BatchProcessor:
             "priority": priority,
             "results": [],
         }
-        
+
         logger.info(
             "batch.queued",
             job_id=job_id,
             pages=len(files),
             priority=priority,
         )
-        
+
         # In production: send to Celery queue
         # celery_app.send_task('process_batch', args=[job_id, file_paths])
-        
+
         return len(files)
-    
-    async def get_status(self, job_id: str) -> Optional[dict]:
+
+    async def get_status(self, job_id: str) -> dict | None:
         """Get job status."""
         job = _jobs.get(job_id)
         if job is None:
             return None
-        
+
         return {
             "job_id": job["job_id"],
             "status": job["status"],
@@ -75,17 +74,17 @@ class BatchProcessor:
             "avg_confidence": None,
             "processing_time_seconds": None,
         }
-    
+
     async def get_results(self, job_id: str, page: int = 1, per_page: int = 20):
         """Get paginated results for a completed job."""
         job = _jobs.get(job_id)
         if job is None or job["status"] != "completed":
             return None
-        
+
         results = job.get("results", [])
         start = (page - 1) * per_page
         end = start + per_page
-        
+
         return {
             "job_id": job_id,
             "page": page,
@@ -93,13 +92,13 @@ class BatchProcessor:
             "total": len(results),
             "results": results[start:end],
         }
-    
+
     async def cancel(self, job_id: str) -> bool:
         """Cancel a job."""
         job = _jobs.get(job_id)
         if job is None or job["status"] == "completed":
             return False
-        
+
         job["status"] = "cancelled"
         logger.info("batch.cancelled", job_id=job_id)
         return True
