@@ -1,0 +1,148 @@
+name: Baseline Predictions
+
+on:
+  workflow_dispatch:
+    inputs:
+      dataset_run_id:
+        description: Workflow run ID containing the packaged line-level evaluation dataset
+        required: true
+        type: string
+      dataset_artifact_name:
+        description: Artifact with manifest files and images/ at its root
+        required: true
+        default: inkbridge-evaluation-dataset
+        type: string
+      data_attestation:
+        description: Enter public-licensed-deidentified-line-data to authorize hosted processing
+        required: true
+        type: string
+      model_id:
+        description: Public Hugging Face TrOCR model repository
+        required: true
+        default: microsoft/trocr-base-handwritten
+        type: string
+      model_revision:
+        description: Model commit, tag, or branch (resolved and recorded as an immutable commit)
+        required: true
+        type: string
+      split:
+        description: Manifest split to predict
+        required: true
+        default: test
+        type: choice
+        options:
+          - test
+          - validation
+          - train
+      batch_size:
+        description: CPU inference batch size
+        required: true
+        default: '8'
+        type: string
+      resume_run_id:
+        description: Optional failed Baseline Predictions run containing prediction-diagnostics
+        required: false
+        type: string
+      resume_artifact_name:
+        description: Diagnostic artifact to resume
+        required: false
+        default: prediction-diagnostics
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Verify hosted-data attestation
+        env:
+          DATA_ATTESTATION: ${{ inputs.data_attestation }}
+        run: |
+          set -euo pipefail
+          if [[ "$DATA_ATTESTATION" != "public-licensed-deidentified-line-data" ]]; then
+            echo "Hosted inference is limited to public, licensed, de-identified line data." >&2
+            exit 2
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install baseline inference dependencies
+        run: |
+          pip install \
+            "torch>=2.1.0" \
+            "transformers>=4.40.0" \
+            "huggingface-hub>=0.23.0" \
+            "Pillow>=10.2.0" \
+            "structlog>=24.1.0"
+
+      - name: Download evaluation dataset package
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.dataset_artifact_name }}
+          path: dataset_package
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.dataset_run_id }}
+
+      - name: Download resumable prediction state
+        if: inputs.resume_run_id != ''
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.resume_artifact_name }}
+          path: prediction_output
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.resume_run_id }}
+
+      - name: Produce pretrained TrOCR predictions
+        env:
+          BATCH_SIZE: ${{ inputs.batch_size }}
+          MODEL_ID: ${{ inputs.model_id }}
+          MODEL_REVISION: ${{ inputs.model_revision }}
+          SPLIT: ${{ inputs.split }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$BATCH_SIZE" =~ ^[1-9][0-9]*$ ]]; then
+            echo "batch_size must be a positive integer" >&2
+            exit 2
+          fi
+
+          python -m scripts.run_baseline_inference \
+            --dataset-dir dataset_package \
+            --output-dir prediction_output \
+            --model-id "$MODEL_ID" \
+            --model-revision "$MODEL_REVISION" \
+            --split "$SPLIT" \
+            --batch-size "$BATCH_SIZE" \
+            --device cpu
+
+      - name: Upload evaluator-ready predictions
+        uses: actions/upload-artifact@v7
+        with:
+          name: evaluation-predictions
+          path: |
+            prediction_output/predictions.jsonl
+            prediction_output/predictions.meta.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Preserve resumable diagnostics after failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: prediction-diagnostics
+          path: |
+            prediction_output/predictions.partial.jsonl
+            prediction_output/prediction_state.json
+          if-no-files-found: ignore
+          retention-days: 7

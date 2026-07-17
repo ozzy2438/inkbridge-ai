@@ -21,6 +21,33 @@ subset.
 Use stable, pseudonymous `sample_id` values. Do not put student names or other personal information
 in prediction artifacts.
 
+The baseline producer always exports the model's raw decoded text in `prediction`. Abstention and
+uncertainty are additional routing fields; replacing low-confidence text with a sentinel would bias
+CER/WER and is therefore not allowed in an evaluation artifact.
+
+## Produce a pretrained baseline
+
+A schema-v2, writer-isolated, line-level dataset package can be predicted locally:
+
+```bash
+python -m scripts.run_baseline_inference \
+  --dataset-dir /protected/data/gnhk-normalized \
+  --output-dir /protected/predictions/trocr-base \
+  --model-id microsoft/trocr-base-handwritten \
+  --model-revision <commit-or-tag> \
+  --split test \
+  --device cpu
+```
+
+The requested Hugging Face revision is resolved once to its immutable commit SHA; that SHA, model
+settings, runtime versions, manifest hashes, and output hash are written to
+`predictions.meta.json`. Source-image hashes are checked before inference. Progress is fsynced to a
+partial JSONL after every batch, and a compatible retry resumes without reprocessing completed
+samples. `predictions.jsonl` appears only after the selected split is complete.
+
+The producer reports line latency. It does not invent `cost_per_page_usd`: honest page cost requires
+page/essay aggregation and infrastructure pricing, which remain a later measurement step.
+
 ## Run an evaluation
 
 ```bash
@@ -56,8 +83,11 @@ they are not a model benchmark or a gold dataset.
 
 ## GitHub Actions
 
-The manually dispatched `Model Evaluation` workflow consumes an artifact named
-`evaluation-predictions` (configurable at dispatch) from a specified workflow run. The artifact must
-contain `predictions.jsonl` at its root. A prior Model Evaluation run and artifact can optionally be
-selected as the release baseline. The workflow does not run model inference: the upstream producer
-of a real prediction artifact is still to be implemented with the locked gold-set access controls.
+The manually dispatched `Baseline Predictions` workflow downloads a self-contained dataset
+artifact, produces `evaluation-predictions`, and preserves resumable diagnostics if inference
+fails. A subsequent `Model Evaluation` dispatch consumes that workflow run ID. A prior Model
+Evaluation run and artifact can optionally be selected as the release baseline.
+
+GitHub-hosted inference is limited to public, licensed, de-identified data by an explicit dispatch
+attestation. The workflow is not an approved path for private student work. It also does not run
+automatically on pull requests, so routine CI never downloads model weights or evaluation images.

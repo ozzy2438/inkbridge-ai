@@ -11,7 +11,7 @@
 InkBridge AI is currently an **alpha research and engineering prototype**, not a
 production deployment. The repository contains a baseline TrOCR inference path,
 heuristic image-quality and layout components, API scaffolding, an offline evaluation
-harness, and annotation workflow design.
+harness, a resumable pretrained TrOCR prediction producer, and annotation workflow design.
 
 The following claims are intentionally deferred until reproducible artifacts exist:
 
@@ -156,6 +156,7 @@ inkbridge-ai/
 │   ├── build_dataset_manifest.py
 │   ├── prepare_datasets.py
 │   ├── run_evaluation.py
+│   ├── run_baseline_inference.py
 │   └── export_onnx.py
 ├── docker/                     # Docker configuration
 │   ├── Dockerfile
@@ -175,6 +176,7 @@ inkbridge-ai/
 ├── Makefile
 └── .github/workflows/          # CI/CD
     ├── ci.yml
+    ├── baseline_predictions.yml
     └── model_evaluation.yml
 ```
 
@@ -197,6 +199,7 @@ source hashing, and deterministic writer-independent split generation.
 - Base: `microsoft/trocr-base-handwritten`
 - Domain fine-tuning is planned; no fine-tuned checkpoint is published yet
 - Normalized datasets can produce hashed, licensed manifests with deterministic writer-isolated splits
+- Line-level manifests can produce resumable prediction artifacts pinned to an immutable model revision
 - Confidence calibration and threshold selection remain evaluation work
 
 ### Prototype fallback: compact VLM
@@ -211,8 +214,9 @@ source hashing, and deterministic writer-independent split generation.
 
 ## 📈 Evaluation contract
 
-The offline evaluator now validates prediction JSONL artifacts, hashes its inputs, and
-computes the implemented metrics below. The repository still has no real model
+The offline evaluator validates prediction JSONL artifacts, hashes its inputs, and computes the
+implemented metrics below. A separate producer can now capture pretrained TrOCR predictions from a
+licensed line-level manifest. The repository still has no real model
 benchmark report because a locked, writer-isolated gold set and captured baseline
 predictions have not yet been published. See the [evaluation contract](docs/evaluation.md)
 for the input schema and release-gate workflow.
