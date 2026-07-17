@@ -21,6 +21,46 @@ pipe-delimited evaluation tags such as `age_8|faint_pencil`; tags are de-duplica
 Filenames must be basenames under `images/`; absolute paths, parent traversal, missing files,
 duplicate filenames, empty text, and empty writer IDs are rejected.
 
+## Public synthetic smoke subset
+
+The repository includes a normalization specification for 27 public OpenHand-Synth line images.
+It exists to exercise the data, manifest, inference, and evaluation plumbing without using student
+work. It is **not** a representative handwriting benchmark and cannot support a claim about model
+quality on children or real classroom documents.
+
+```bash
+python -m scripts.prepare_hf_smoke_subset \
+  --output-dir data/processed/openhand-synth-smoke
+```
+
+The adapter accepts only the configured Hugging Face dataset revision and card licence, then checks
+every selected row's index, synthetic style ID, reference, language, source category, dimensions,
+and image SHA-256 before publishing `labels.csv`. Its current selection is restricted to English
+Faker-generated names and dates; those strings are synthetic, not real identities. Expiring image
+URLs are never written to the output. `source.meta.json` and `ATTRIBUTION.md` record the source,
+licence, transformation, spec hash, and output hashes.
+
+The normalized images are intentionally ignored by Git. Recreate them from
+`configs/datasets/openhand_synth_smoke.json`, and retain the generated attribution file with any
+redistributed derivative. The synthetic `writer_id` values describe rendering styles; they do not
+identify people.
+
+To exercise the writer-isolated manifest contract after preparation:
+
+```bash
+python -m scripts.build_dataset_manifest \
+  --dataset-dir data/processed/openhand-synth-smoke \
+  --output-dir data/processed/openhand-synth-smoke \
+  --dataset-name openhand-synth-smoke \
+  --dataset-version 8b5027ab2dc6cc944e0ce7fe37997ce046121e66-selection-v1 \
+  --license-id cc-by-4.0 \
+  --license-url https://creativecommons.org/licenses/by/4.0/ \
+  --sample-type line \
+  --train-ratio 0.6 \
+  --val-ratio 0.2 \
+  --test-ratio 0.2
+```
+
 ## Build the manifest
 
 ```bash

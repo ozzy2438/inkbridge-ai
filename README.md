@@ -187,11 +187,13 @@ inkbridge-ai/
 | [IAM Handwriting Database](https://fki.tic.heia-fr.ch/databases/iam-handwriting-database) | Standard benchmark & baseline | 13,353 lines, 657 writers | Research |
 | [SMHD](https://doi.org/10.25439/rmt.24312715.v1) | Student essays, cross-outs, corrections | 500+ students, essays & math | CC BY-NC 4.0 |
 | [GNHK](https://github.com/GoodNotes/GNHK-dataset) | Camera-captured, varied conditions | 687 images, 9,363 lines | CC BY 4.0 |
+| [OpenHand-Synth](https://huggingface.co/datasets/to-be/OpenHand-Synth) | Synthetic pipeline smoke test only | Pinned 27-line subset | CC BY 4.0 |
 | Synthetic Augmented | Blur, shadow, glare, rotation | Generated on-the-fly | N/A |
 | Consented Pilot Set | Production-like evaluation | TBD (pilot phase) | Private |
 
 See the [dataset contract](docs/data_contract.md) for normalized labels, provenance fields,
-source hashing, and deterministic writer-independent split generation.
+source hashing, the reproducible public smoke subset, and deterministic writer-independent split
+generation. Synthetic smoke results are plumbing evidence, not student-handwriting benchmarks.
 
 ## 🔬 Model Architecture
 

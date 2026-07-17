@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "purpose": "synthetic_pipeline_smoke_only",
+  "dataset": {
+    "id": "to-be/OpenHand-Synth",
+    "revision": "8b5027ab2dc6cc944e0ce7fe37997ce046121e66",
+    "config": "default",
+    "split": "train",
+    "license_id": "cc-by-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source_url": "https://huggingface.co/datasets/to-be/OpenHand-Synth",
+    "attribution": "OpenHand-Synth by Toon Beerten",
+    "allowed_sources": [
+      "faker-name",
+      "faker-date"
+    ]
+  },
+  "constraints": {
+    "language": "eng",
+    "max_height": 200,
+    "sample_type": "line"
+  },
+  "selection": [
+    {
+      "row_idx": 5072,
+      "writer_id": 0,
+      "reference": "Cheryl Myers",
+      "width": 415,
+      "height": 134,
+      "image_sha256": "09a8ba4ec0cc871cbd190fd3ecf41bc88ff404698317b6e65f5f7945b09115db"
+    },
+    {
+      "row_idx": 8130,
+      "writer_id": 0,
+      "reference": "Thomas Smith",
+      "width": 518,
+      "height": 114,
+      "image_sha256": "43e1fd428bf341b2224b7dc5839f587c8a939e9b748a9a40c713d4f7a2239cea"
+    },
+    {
+      "row_idx": 17415,
+      "writer_id": 0,
+      "reference": "Rachel Steele",
+      "width": 431,
+      "height": 111,
+      "image_sha256": "eeb6fce2e07b6e951df9ceb48bb5a796a7827aa9744de79f3224d38551ea27a2"
+    },
+    {
+      "row_idx": 3718,
+      "writer_id": 1,
+      "reference": "Ronald Young Jr.",
+      "width": 507,
+      "height": 114,
+      "image_sha256": "c593006ca48d1cc50ea6f3288a755a7ff007d9f9da73793ca5012bd1d5273cac"
+    },
+    {
+      "row_idx": 11230,
+      "writer_id": 1,
+      "reference": "Ellen Bryant",
+      "width": 370,
+      "height": 100,
+      "image_sha256": "7351163fc8dd46ceb134fc8c6ca759b4efd3db64b7f31da10732d35bec532855"
+    },
+    {
+      "row_idx": 35015,
+      "writer_id": 1,
+      "reference": "Drew Powell",
+      "width": 337,
+      "height": 114,
+      "image_sha256": "6e196019e2eb87cc55476663d3e79a7ad4ff47ce949bbc37e19487b22291af7f"
+    },
+    {
+      "row_idx": 158,
+      "writer_id": 4,
+      "reference": "August 25th, 1555",
+      "width": 651,
+      "height": 185,
+      "image_sha256": "e1923c6c796663c6e09bc81880af00cd3b3167e28b643f889d857edb2700aef2"
+    },
+    {
+      "row_idx": 13673,
+      "writer_id": 4,
+      "reference": "Nathan Johnson",
+      "width": 460,
+      "height": 146,
+      "image_sha256": "a890eef5a5a3ef716471375c26c18e28d23ea62e6cd675d8b608bf67cc96f393"
+    },
+    {
+      "row_idx": 28684,
+      "writer_id": 4,
+      "reference": "William Jackson",
+      "width": 460,
+      "height": 153,
+      "image_sha256": "2b69cfde01ac1c27928f4a438d51e70f4b3c2c5aaea7ca27af2df9cc8b013ad2"
+    },
+    {
+      "row_idx": 1611,
+      "writer_id": 5,
+      "reference": "William Young",
+      "width": 524,
+      "height": 135,
+      "image_sha256": "98a118ab13d2a695e842a273deaa6d59b612dd76133b5b70e7bcccbb35f3ae0f"
+    },
+    {
+      "row_idx": 9967,
+      "writer_id": 5,
+      "reference": "Mr Terence Welch",
+      "width": 594,
+      "height": 123,
+      "image_sha256": "6d423bc952c144a1f12b390a5dc7618629608dd2876bc5c00715d50c59faee9d"
+    },
+    {
+      "row_idx": 17382,
+      "writer_id": 5,
+      "reference": "4 May 1086",
+      "width": 370,
+      "height": 143,
+      "image_sha256": "99f0beb127946758a741dd58f7d12fc0e9c50710bfe99780a06f527aef2eb4fc"
+    },
+    {
+      "row_idx": 20044,
+      "writer_id": 6,
+      "reference": "Michelle Ball",
+      "width": 571,
+      "height": 101,
+      "image_sha256": "855648c6b11f7ea0c420e80d9ad67d0931c2c40d02d45f15f6524f12f052cbf6"
+    },
+    {
+      "row_idx": 34285,
+      "writer_id": 6,
+      "reference": "Jan 7, 1696",
+      "width": 580,
+      "height": 113,
+      "image_sha256": "b3e815db7f24c0065d2deedfb5d2fc5e89cfa6bf0a59f222bc444c12d69406f0"
+    },
+    {
+      "row_idx": 35057,
+      "writer_id": 6,
+      "reference": "Jennifer Brown",
+      "width": 653,
+      "height": 131,
+      "image_sha256": "b2033b848acf2e0f4bde2741e1ad2491fd6f8a6a60018b80fd4284b920fb5501"
+    },
+    {
+      "row_idx": 5341,
+      "writer_id": 11,
+      "reference": "Mallory Berry",
+      "width": 333,
+      "height": 109,
+      "image_sha256": "728de93d051b43c8cb5a2861d04ed09229e7e82ed0bf08fa6a11683421f5c5ce"
+    },
+    {
+      "row_idx": 15044,
+      "writer_id": 11,
+      "reference": "Sunday 9 August 1846",
+      "width": 563,
+      "height": 119,
+      "image_sha256": "9e09d1525885944d515b9d03c45277f96d735c83e71e2956d1f1021680177f47"
+    },
+    {
+      "row_idx": 18653,
+      "writer_id": 11,
+      "reference": "Christopher Bell",
+      "width": 385,
+      "height": 106,
+      "image_sha256": "f8e6125c001b0ad2f3b93f6d37c696532c11ca0d73fdda2b1e425ac60b50a138"
+    },
+    {
+      "row_idx": 6729,
+      "writer_id": 12,
+      "reference": "Mary Wells",
+      "width": 346,
+      "height": 130,
+      "image_sha256": "a78887074135894faf7f2ca63536b8b68a7d3cbb6e43f269aa9106b44ec5d827"
+    },
+    {
+      "row_idx": 9561,
+      "writer_id": 12,
+      "reference": "Abigail Franklin",
+      "width": 512,
+      "height": 140,
+      "image_sha256": "9b699dc787c3e8398c5fafa64c1287a29403a137747aa3904a6c5436eea77f51"
+    },
+    {
+      "row_idx": 18277,
+      "writer_id": 12,
+      "reference": "April 20, 1712",
+      "width": 488,
+      "height": 128,
+      "image_sha256": "b3773435253186cbd2ef640fa72eb3a98a1684f9783cd0dbb3bf388fece01b60"
+    },
+    {
+      "row_idx": 9501,
+      "writer_id": 13,
+      "reference": "Debra Garcia",
+      "width": 456,
+      "height": 128,
+      "image_sha256": "2308e67db23ad499017d626a6cf62ddc8772cff4f5f4bd207d31ccef0bd95195"
+    },
+    {
+      "row_idx": 15719,
+      "writer_id": 13,
+      "reference": "Donna Davis",
+      "width": 464,
+      "height": 120,
+      "image_sha256": "03ab264784bd2bddbd4039e3aec3b9320e95048d68862021f675c1baff08e131"
+    },
+    {
+      "row_idx": 38490,
+      "writer_id": 13,
+      "reference": "Connor Hughes-Whitehead",
+      "width": 802,
+      "height": 156,
+      "image_sha256": "2d1cd9e98c49d09b0bdd8185870fdcbb6c559d1f36718177ef97a29252af3821"
+    },
+    {
+      "row_idx": 12060,
+      "writer_id": 14,
+      "reference": "May 1st, 1919",
+      "width": 448,
+      "height": 120,
+      "image_sha256": "c1eb67908c2d9e3034f99012ad34f2ced36296967f2bbc827025f5fea233cf84"
+    },
+    {
+      "row_idx": 13986,
+      "writer_id": 14,
+      "reference": "Katie Holden-Heath",
+      "width": 590,
+      "height": 102,
+      "image_sha256": "3361d4d61d9952fdc61c7ad075e8e0572bbc73c6935b2885094d49c830f9b6fc"
+    },
+    {
+      "row_idx": 30280,
+      "writer_id": 14,
+      "reference": "16-01-1639",
+      "width": 380,
+      "height": 106,
+      "image_sha256": "815be98fa380c0e6f217771818d0094df3231f7d8cc0cb0041442828957d5c36"
+    }
+  ]
+}
