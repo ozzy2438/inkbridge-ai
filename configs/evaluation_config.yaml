@@ -1,41 +1,43 @@
 # Evaluation Configuration
 evaluation:
-  # Gold test set (locked, never used in training)
-  gold_test_set: "./data/gold_test/"
+  # Configure this only after a versioned, writer-isolated gold set exists.
+  gold_test_set: null
+
+  # Offline prediction artifact consumed by scripts/run_evaluation.py.
+  prediction_schema:
+    format: jsonl
+    required_fields:
+      - sample_id
+      - source_sha256
+      - reference
+      - prediction
+    optional_complete_fields:
+      - confidence
+      - latency_ms
+      - cost_per_page_usd
+    optional_fields:
+      - slices
   
-  # Metrics to compute
+  # Metrics currently emitted by the evaluator.
   metrics:
-    text_recognition:
+    implemented:
       - cer
       - wer
       - normalized_edit_distance
-    
-    layout:
-      - region_f1
-      - reading_order_accuracy
-      - paragraph_break_fidelity
-    
-    reliability:
       - calibration_error
       - false_confidence_rate
       - abstention_precision
-    
-    operations:
-      - correction_minutes_per_page
-      - auto_accept_rate
-    
-    production:
       - p50_latency_ms
       - p95_latency_ms
       - pages_per_minute
       - cost_per_page_usd
-    
-    edge_cases:
-      - blur_cer
-      - cursive_cer
-      - crossout_cer
-      - faint_pencil_cer
-      - insertion_cer
+      - per_slice_metrics
+    planned:
+      - region_f1
+      - reading_order_accuracy
+      - paragraph_break_fidelity
+      - correction_minutes_per_page
+      - auto_accept_rate
 
   # Model release gate
   release_gate:
@@ -45,7 +47,7 @@ evaluation:
     # No slice regression beyond threshold
     max_slice_regression: 0.02  # No slice can get 2%+ worse
     
-    # Output validity
+    # Every JSONL record must pass schema validation.
     min_valid_output_rate: 1.0  # 100% valid JSON output
     
     # Latency limits

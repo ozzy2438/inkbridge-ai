@@ -22,12 +22,12 @@ test-regression:
 
 # Code quality
 lint:
-	ruff check src/ tests/
+	ruff check src/ scripts/ tests/
 	mypy src/ --ignore-missing-imports
 
 format:
-	black src/ tests/
-	ruff check --fix src/ tests/
+	ruff check --fix src/ scripts/ tests/
+	ruff format src/ scripts/ tests/
 
 # Docker
 docker-build:
@@ -47,7 +47,8 @@ train:
 	python -m src.training.finetune_trocr
 
 evaluate:
-	python scripts/run_evaluation.py --model-version latest --test-set gold
+	@test -n "$(PREDICTIONS)" || (echo "PREDICTIONS=/path/to/predictions.jsonl is required" && exit 2)
+	python -m scripts.run_evaluation --predictions "$(PREDICTIONS)" --model-version "$(or $(MODEL_VERSION),local)" --test-set "$(or $(TEST_SET),gold)"
 
 export-onnx:
 	python scripts/export_onnx.py --model-path ./checkpoints/trocr-finetuned --quantize

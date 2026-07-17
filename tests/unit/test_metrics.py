@@ -1,6 +1,9 @@
 """Unit tests for evaluation metrics."""
 
+import pytest
+
 from src.evaluation.metrics import (
+    calibration_error,
     character_error_rate,
     compute_full_metrics,
     false_confidence_rate,
@@ -57,3 +60,14 @@ def test_compute_full_metrics():
     assert "wer" in metrics
     assert "normalized_edit_distance" in metrics
     assert metrics["cer"] == 0.0
+
+
+def test_metric_length_mismatch_is_rejected():
+    """Parallel metric inputs must never be silently truncated by zip."""
+    with pytest.raises(ValueError, match="equal lengths"):
+        character_error_rate(["one", "two"], ["one"])
+
+
+def test_zero_confidence_is_included_in_calibration():
+    """The first ECE bin must include confidence exactly equal to zero."""
+    assert calibration_error([0.0], [True]) == 1.0

@@ -10,8 +10,8 @@
 
 InkBridge AI is currently an **alpha research and engineering prototype**, not a
 production deployment. The repository contains a baseline TrOCR inference path,
-heuristic image-quality and layout components, API scaffolding, evaluation metric
-definitions, and annotation workflow design.
+heuristic image-quality and layout components, API scaffolding, an offline evaluation
+harness, and annotation workflow design.
 
 The following claims are intentionally deferred until reproducible artifacts exist:
 
@@ -132,6 +132,7 @@ inkbridge-ai/
 │   │   └── active_learning.py  # Active learning loop
 │   ├── evaluation/             # Evaluation framework
 │   │   ├── metrics.py          # CER, WER, calibration
+│   │   ├── runner.py           # Artifact validation and release gates
 │   │   └── failure_atlas.py    # Failure categorization
 │   ├── data/                   # Data processing
 │   │   ├── datasets.py         # Dataset loaders
@@ -147,8 +148,8 @@ inkbridge-ai/
 │   └── evaluation_config.yaml
 ├── tests/                      # Test suite
 │   ├── unit/
-│   ├── integration/            # Planned test coverage
-│   └── regression/             # Planned model regression coverage
+│   ├── integration/            # API lifecycle coverage
+│   └── regression/             # Evaluation release-gate coverage
 ├── scripts/                    # Utility scripts
 │   ├── download_models.py
 │   ├── prepare_datasets.py
@@ -165,6 +166,7 @@ inkbridge-ai/
 │   └── 01_baseline_evaluation.ipynb
 ├── docs/                       # Documentation
 │   ├── annotation_guidelines.md
+│   ├── evaluation.md
 │   └── model_card.md
 ├── pyproject.toml
 ├── Makefile
@@ -203,15 +205,18 @@ inkbridge-ai/
 
 ## 📈 Evaluation contract
 
-These are the target metrics. The repository does not yet contain a completed
-evaluation report.
+The offline evaluator now validates prediction JSONL artifacts, hashes its inputs, and
+computes the implemented metrics below. The repository still has no real model
+benchmark report because a locked, writer-isolated gold set and captured baseline
+predictions have not yet been published. See the [evaluation contract](docs/evaluation.md)
+for the input schema and release-gate workflow.
 
 | Category | Metrics |
 |----------|--------|
 | Text Recognition | CER, WER, Normalized Edit Distance |
-| Layout | Region F1, Reading Order Accuracy |
+| Layout | Region F1, Reading Order Accuracy **(planned)** |
 | Reliability | Calibration Error, False-Confidence Rate |
-| Operations | Correction Minutes/Page, Auto-Accept Rate |
+| Operations | Correction Minutes/Page, Auto-Accept Rate **(planned)** |
 | Production | p50/p95 Latency, Pages/Min, Cost/Page |
 | Edge Cases | Blur, Cursive, Cross-outs, Insertions |
 

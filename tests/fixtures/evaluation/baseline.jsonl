@@ -1,0 +1,3 @@
+{"sample_id":"page-001","source_sha256":"1111111111111111111111111111111111111111111111111111111111111111","reference":"hello world","prediction":"helo world","confidence":0.85,"slices":["clean","print"],"latency_ms":180.0,"cost_per_page_usd":0.004}
+{"sample_id":"page-002","source_sha256":"2222222222222222222222222222222222222222222222222222222222222222","reference":"the quick fox","prediction":"the quik fox","confidence":0.82,"slices":["clean","cursive"],"latency_ms":210.0,"cost_per_page_usd":0.004}
+{"sample_id":"page-003","source_sha256":"3333333333333333333333333333333333333333333333333333333333333333","reference":"student writing","prediction":"student writ","confidence":0.65,"slices":["cursive","faint_pencil"],"latency_ms":260.0,"cost_per_page_usd":0.004}

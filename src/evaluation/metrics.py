@@ -9,6 +9,8 @@ Computes:
 - Per-slice metrics
 """
 
+from collections.abc import Sequence
+
 import numpy as np
 import structlog
 
@@ -21,6 +23,8 @@ def character_error_rate(predictions: list[str], references: list[str]) -> float
     CER = (substitutions + insertions + deletions) / reference_length
     """
     import jiwer
+
+    _validate_equal_lengths(predictions=predictions, references=references)
 
     # Handle empty cases
     if not predictions or not references:
@@ -35,6 +39,7 @@ def word_error_rate(predictions: list[str], references: list[str]) -> float:
     """Compute Word Error Rate."""
     import jiwer
 
+    _validate_equal_lengths(predictions=predictions, references=references)
     if not predictions or not references:
         return 1.0
 
@@ -44,6 +49,7 @@ def word_error_rate(predictions: list[str], references: list[str]) -> float:
 
 def normalized_edit_distance(predictions: list[str], references: list[str]) -> float:
     """Compute normalized edit distance (average over samples)."""
+    _validate_equal_lengths(predictions=predictions, references=references)
     if not predictions or not references:
         return 1.0
 
@@ -87,6 +93,11 @@ def calibration_error(
     Measures how well confidence scores correlate with actual accuracy.
     A well-calibrated model: when it says 80% confidence, it's correct 80% of the time.
     """
+    _validate_equal_lengths(confidences=confidences, correct=correct)
+    if n_bins <= 0:
+        raise ValueError("n_bins must be positive")
+    if any(confidence < 0 or confidence > 1 for confidence in confidences):
+        raise ValueError("confidences must be between 0 and 1")
     if not confidences:
         return 0.0
 
@@ -97,7 +108,8 @@ def calibration_error(
     ece = 0.0
 
     for i in range(n_bins):
-        mask = (confs > bin_boundaries[i]) & (confs <= bin_boundaries[i + 1])
+        lower_bound = confs >= bin_boundaries[i] if i == 0 else confs > bin_boundaries[i]
+        mask = lower_bound & (confs <= bin_boundaries[i + 1])
         if mask.sum() == 0:
             continue
 
@@ -120,6 +132,13 @@ def false_confidence_rate(
 
     This is critical for production: the system should not be confidently wrong.
     """
+    _validate_equal_lengths(
+        predictions=predictions,
+        references=references,
+        confidences=confidences,
+    )
+    if threshold < 0 or threshold > 1:
+        raise ValueError("threshold must be between 0 and 1")
     high_conf_mask = np.array(confidences) >= threshold
 
     if high_conf_mask.sum() == 0:
@@ -151,6 +170,13 @@ def abstention_precision(
     - correct_abstentions: abstained items that were actually wrong
     - unnecessary_abstentions: abstained items that were actually correct
     """
+    _validate_equal_lengths(
+        predictions=predictions,
+        references=references,
+        confidences=confidences,
+    )
+    if abstention_threshold < 0 or abstention_threshold > 1:
+        raise ValueError("abstention_threshold must be between 0 and 1")
     abstained = np.array(confidences) < abstention_threshold
 
     if abstained.sum() == 0:
@@ -183,6 +209,10 @@ def compute_full_metrics(
     confidences: list[float] | None = None,
 ) -> dict:
     """Compute all evaluation metrics."""
+    _validate_equal_lengths(predictions=predictions, references=references)
+    if confidences is not None:
+        _validate_equal_lengths(predictions=predictions, confidences=confidences)
+
     metrics: dict[str, object] = {
         "cer": character_error_rate(predictions, references),
         "wer": word_error_rate(predictions, references),
@@ -202,3 +232,11 @@ def compute_full_metrics(
         metrics["mean_confidence"] = float(np.mean(confidences))
 
     return metrics
+
+
+def _validate_equal_lengths(**values: Sequence[object]) -> None:
+    """Reject silent truncation when parallel metric inputs are misaligned."""
+    lengths = {name: len(items) for name, items in values.items()}
+    if len(set(lengths.values())) > 1:
+        rendered = ", ".join(f"{name}={length}" for name, length in lengths.items())
+        raise ValueError(f"Metric inputs must have equal lengths: {rendered}")
