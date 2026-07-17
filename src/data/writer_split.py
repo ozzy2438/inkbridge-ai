@@ -1,17 +1,11 @@
-"""Writer-Independent Data Splitting.
+"""Deterministic writer-independent dataset splitting."""
 
-CRITICAL: Train/test split MUST be writer-based, not image-based.
+from __future__ import annotations
 
-If the same writer's pages appear in both train and test:
-- The model memorizes handwriting style
-- Test metrics are artificially inflated
-- Real-world performance will be worse
-
-This module ensures strict writer isolation.
-"""
-
+import math
 import random
-from collections import defaultdict
+from collections import Counter, defaultdict
+from typing import Any
 
 import structlog
 
@@ -19,82 +13,131 @@ logger = structlog.get_logger()
 
 
 def create_writer_split(
-    samples: list[dict],
+    samples: list[dict[str, Any]],
     train_ratio: float = 0.7,
     val_ratio: float = 0.15,
     test_ratio: float = 0.15,
     seed: int = 42,
     min_samples_per_writer: int = 3,
-) -> tuple[list[dict], list[dict], list[dict]]:
-    """Split dataset by writer ID, ensuring no writer leakage.
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    """Split by writer while rejecting leakage-prone or silently dropped data."""
+    ratios = (train_ratio, val_ratio, test_ratio)
+    if any(ratio < 0 for ratio in ratios) or not math.isclose(sum(ratios), 1.0, abs_tol=1e-9):
+        raise ValueError("train_ratio, val_ratio, and test_ratio must be non-negative and sum to 1")
+    if min_samples_per_writer < 1:
+        raise ValueError("min_samples_per_writer must be at least 1")
+    if not samples:
+        raise ValueError("At least one sample is required for writer splitting")
 
-    Args:
-        samples: List of {image_path, text, writer_id}
-        train_ratio: Fraction for training
-        val_ratio: Fraction for validation
-        test_ratio: Fraction for testing
-        seed: Random seed for reproducibility
-        min_samples_per_writer: Minimum samples to include a writer
-
-    Returns:
-        (train_samples, val_samples, test_samples)
-    """
-    assert abs(train_ratio + val_ratio + test_ratio - 1.0) < 1e-6
-
-    random.seed(seed)
-
-    # Group by writer
-    writer_samples = defaultdict(list)
-    for sample in samples:
-        writer_id = sample.get("writer_id", "unknown")
+    writer_samples: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for index, sample in enumerate(samples):
+        writer_id = sample.get("writer_id")
+        if not isinstance(writer_id, str) or not writer_id.strip():
+            raise ValueError(f"Sample {index} is missing a non-empty writer_id")
         writer_samples[writer_id].append(sample)
 
-    # Filter writers with too few samples
-    valid_writers = [w for w, s in writer_samples.items() if len(s) >= min_samples_per_writer]
+    undersized = {
+        writer_id: len(writer_records)
+        for writer_id, writer_records in writer_samples.items()
+        if len(writer_records) < min_samples_per_writer
+    }
+    if undersized:
+        distribution = Counter(undersized.values())
+        raise ValueError(
+            "Writers below min_samples_per_writer would be dropped; "
+            f"count_by_sample_size={dict(sorted(distribution.items()))}"
+        )
 
-    # Shuffle writers
-    random.shuffle(valid_writers)
+    writers = sorted(writer_samples)
+    nonzero_split_count = sum(ratio > 0 for ratio in ratios)
+    if len(writers) < nonzero_split_count:
+        raise ValueError(
+            f"Need at least {nonzero_split_count} writers for non-empty requested splits"
+        )
 
-    # Split writers
-    n_writers = len(valid_writers)
-    n_train = int(n_writers * train_ratio)
-    n_val = int(n_writers * val_ratio)
+    random.Random(seed).shuffle(writers)
+    train_count, val_count, _ = _allocate_counts(len(writers), ratios)
+    train_writers = set(writers[:train_count])
+    val_writers = set(writers[train_count : train_count + val_count])
+    test_writers = set(writers[train_count + val_count :])
 
-    train_writers = set(valid_writers[:n_train])
-    val_writers = set(valid_writers[n_train : n_train + n_val])
-    test_writers = set(valid_writers[n_train + n_val :])
-
-    # Assign samples
-    train_samples = []
-    val_samples = []
-    test_samples = []
-
-    for writer_id, writer_samps in writer_samples.items():
-        if writer_id in train_writers:
-            train_samples.extend(writer_samps)
-        elif writer_id in val_writers:
-            val_samples.extend(writer_samps)
-        elif writer_id in test_writers:
-            test_samples.extend(writer_samps)
-
-    # Verify no leakage
-    train_writer_set = set(s["writer_id"] for s in train_samples)
-    val_writer_set = set(s["writer_id"] for s in val_samples)
-    test_writer_set = set(s["writer_id"] for s in test_samples)
-
-    assert len(train_writer_set & val_writer_set) == 0, "Writer leakage: train/val"
-    assert len(train_writer_set & test_writer_set) == 0, "Writer leakage: train/test"
-    assert len(val_writer_set & test_writer_set) == 0, "Writer leakage: val/test"
+    train_samples = _records_for_writers(writer_samples, train_writers)
+    val_samples = _records_for_writers(writer_samples, val_writers)
+    test_samples = _records_for_writers(writer_samples, test_writers)
+    _assert_writer_isolation(train_samples, val_samples, test_samples)
 
     logger.info(
         "writer_split.created",
-        total_writers=n_writers,
+        total_writers=len(writers),
         train_writers=len(train_writers),
         val_writers=len(val_writers),
         test_writers=len(test_writers),
         train_samples=len(train_samples),
         val_samples=len(val_samples),
         test_samples=len(test_samples),
+        seed=seed,
     )
-
     return train_samples, val_samples, test_samples
+
+
+def _allocate_counts(total: int, ratios: tuple[float, float, float]) -> tuple[int, int, int]:
+    """Allocate writers with non-empty positive-ratio splits and deterministic remainders."""
+    raw_counts = [total * ratio for ratio in ratios]
+    counts = [math.floor(value) for value in raw_counts]
+    unallocated = total - sum(counts)
+    remainder_order = sorted(
+        range(len(ratios)),
+        key=lambda index: (raw_counts[index] - counts[index], ratios[index], -index),
+        reverse=True,
+    )
+    for index in remainder_order[:unallocated]:
+        counts[index] += 1
+
+    for index, ratio in enumerate(ratios):
+        if ratio == 0 or counts[index] > 0:
+            continue
+        donors = [candidate for candidate, count in enumerate(counts) if count > 1]
+        if not donors:
+            raise RuntimeError("Unable to allocate a writer to every positive-ratio split")
+        donor = max(
+            donors,
+            key=lambda candidate: (
+                counts[candidate] - raw_counts[candidate],
+                counts[candidate],
+                ratios[candidate],
+                -candidate,
+            ),
+        )
+        counts[donor] -= 1
+        counts[index] += 1
+
+    return counts[0], counts[1], counts[2]
+
+
+def _records_for_writers(
+    writer_samples: dict[str, list[dict[str, Any]]], writer_ids: set[str]
+) -> list[dict[str, Any]]:
+    return [
+        sample
+        for writer_id in sorted(writer_ids)
+        for sample in sorted(
+            writer_samples[writer_id], key=lambda value: str(value.get("sample_id", ""))
+        )
+    ]
+
+
+def _assert_writer_isolation(
+    train_samples: list[dict[str, Any]],
+    val_samples: list[dict[str, Any]],
+    test_samples: list[dict[str, Any]],
+) -> None:
+    writer_sets = [
+        {str(sample["writer_id"]) for sample in split}
+        for split in (train_samples, val_samples, test_samples)
+    ]
+    if writer_sets[0] & writer_sets[1]:
+        raise RuntimeError("Writer leakage detected between train and validation")
+    if writer_sets[0] & writer_sets[2]:
+        raise RuntimeError("Writer leakage detected between train and test")
+    if writer_sets[1] & writer_sets[2]:
+        raise RuntimeError("Writer leakage detected between validation and test")

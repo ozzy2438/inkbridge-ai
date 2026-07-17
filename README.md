@@ -135,6 +135,7 @@ inkbridge-ai/
 │   │   ├── runner.py           # Artifact validation and release gates
 │   │   └── failure_atlas.py    # Failure categorization
 │   ├── data/                   # Data processing
+│   │   ├── manifest.py         # Licensed provenance and split manifests
 │   │   ├── datasets.py         # Dataset loaders
 │   │   ├── augmentation.py     # Data augmentation
 │   │   └── writer_split.py     # Writer-independent splits
@@ -152,6 +153,7 @@ inkbridge-ai/
 │   └── regression/             # Evaluation release-gate coverage
 ├── scripts/                    # Utility scripts
 │   ├── download_models.py
+│   ├── build_dataset_manifest.py
 │   ├── prepare_datasets.py
 │   ├── run_evaluation.py
 │   └── export_onnx.py
@@ -166,6 +168,7 @@ inkbridge-ai/
 │   └── 01_baseline_evaluation.ipynb
 ├── docs/                       # Documentation
 │   ├── annotation_guidelines.md
+│   ├── data_contract.md
 │   ├── evaluation.md
 │   └── model_card.md
 ├── pyproject.toml
@@ -185,12 +188,15 @@ inkbridge-ai/
 | Synthetic Augmented | Blur, shadow, glare, rotation | Generated on-the-fly | N/A |
 | Consented Pilot Set | Production-like evaluation | TBD (pilot phase) | Private |
 
+See the [dataset contract](docs/data_contract.md) for normalized labels, provenance fields,
+source hashing, and deterministic writer-independent split generation.
+
 ## 🔬 Model Architecture
 
 ### Current baseline: pretrained TrOCR
 - Base: `microsoft/trocr-base-handwritten`
 - Domain fine-tuning is planned; no fine-tuned checkpoint is published yet
-- Writer-independent splitting is implemented as a utility but is not yet wired into data preparation
+- Normalized datasets can produce hashed, licensed manifests with deterministic writer-isolated splits
 - Confidence calibration and threshold selection remain evaluation work
 
 ### Prototype fallback: compact VLM

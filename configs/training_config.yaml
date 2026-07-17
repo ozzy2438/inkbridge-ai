@@ -60,17 +60,22 @@ data:
       path: "./data/raw/iam"
       enabled: true
       purpose: "baseline_benchmark"
+      license: "Custom research-use terms"
+      license_url: "https://fki.tic.heia-fr.ch/databases/iam-handwriting-database"
     
     smhd:
       path: "./data/raw/smhd"
       enabled: true
       purpose: "student_essays_crossouts"
-      license: "CC-BY-NC"
+      license: "CC-BY-NC-4.0"
+      license_url: "https://creativecommons.org/licenses/by-nc/4.0/"
     
     gnhk:
       path: "./data/raw/gnhk"
       enabled: true
       purpose: "camera_captured_handwriting"
+      license: "CC-BY-4.0"
+      license_url: "https://creativecommons.org/licenses/by/4.0/"
     
     augmented:
       enabled: true

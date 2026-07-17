@@ -67,7 +67,7 @@ jobs:
         run: |
           pytest tests/integration/ -v
 
-  evaluation-regression:
+  ml-contract-regression:
     runs-on: ubuntu-latest
     needs: lint-and-test
     timeout-minutes: 10
@@ -83,7 +83,7 @@ jobs:
       - name: Install evaluation dependencies
         run: pip install pytest jiwer numpy pyyaml structlog
 
-      - name: Run evaluation release-gate regression tests
+      - name: Run ML data and evaluation contract regression tests
         run: pytest -o addopts="" tests/regression/ -v
 
   docker-build:
