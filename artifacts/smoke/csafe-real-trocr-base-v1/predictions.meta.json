@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-07-17T11:50:53.859986+00:00",
+  "input": {
+    "dataset": {
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "name": "csafe-real-handwriting-smoke",
+      "sample_type": "line",
+      "version": "figshare-10062203-v2-selection-v1"
+    },
+    "manifest_filename": "manifest.jsonl",
+    "manifest_metadata_sha256": "725a8efc9af2080a7588a763a596b472876973fa9e5736604d3118bbb27a15e4",
+    "manifest_sha256": "8f6c738199da8c36798ff888a7d11464519027bb9884d7e5de84eb9f706c211d",
+    "num_records": 5,
+    "split": "test"
+  },
+  "model": {
+    "abstention_threshold": 0.4,
+    "batch_size": 2,
+    "beam_width": 4,
+    "confidence_threshold": 0.7,
+    "device": "cpu",
+    "dtype": "float32",
+    "max_length": 64,
+    "model_id": "microsoft/trocr-base-handwritten",
+    "model_version": "microsoft/trocr-base-handwritten@eaacaf452b06415df8f10bb6fad3a4c11e609406",
+    "requested_revision": "eaacaf452b06415df8f10bb6fad3a4c11e609406",
+    "resolved_revision": "eaacaf452b06415df8f10bb6fad3a4c11e609406",
+    "runtime": {
+      "huggingface_hub": "0.36.2",
+      "machine": "arm64",
+      "os": "Darwin",
+      "os_release": "27.0.0",
+      "python": "3.11.13",
+      "torch": "2.13.0",
+      "transformers": "4.57.6"
+    }
+  },
+  "output": {
+    "filename": "predictions.jsonl",
+    "num_records": 5,
+    "sha256": "eb905434cf4c0512408e6ff832376999e5da137e60666bf53e8ec4d597e4e904"
+  },
+  "privacy": {
+    "source_images_exported": false,
+    "writer_ids_exported": false
+  },
+  "schema_version": 1,
+  "status": "complete"
+}

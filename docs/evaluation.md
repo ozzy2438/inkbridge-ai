@@ -87,6 +87,11 @@ The captured [OpenHand-Synth TrOCR smoke artifact](../artifacts/smoke/openhand-s
 is separate from those unit fixtures. It contains real pretrained-model outputs, but its six
 synthetic lines remain engineering evidence rather than a student-handwriting benchmark.
 
+The captured [CSAFE TrOCR smoke artifact](../artifacts/smoke/csafe-real-trocr-base-v1/README.md)
+advances that check to real adult handwriting: five test lines from two writer-isolated
+participants. Its prompt-derived references have not received independent human verification, so
+it remains pipeline evidence—not a gold set or a claim about child/student handwriting.
+
 ## GitHub Actions
 
 The manually dispatched `Baseline Predictions` workflow downloads a self-contained dataset

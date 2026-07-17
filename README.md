@@ -188,12 +188,14 @@ inkbridge-ai/
 | [SMHD](https://doi.org/10.25439/rmt.24312715.v1) | Student essays, cross-outs, corrections | 500+ students, essays & math | CC BY-NC 4.0 |
 | [GNHK](https://github.com/GoodNotes/GNHK-dataset) | Camera-captured, varied conditions | 687 images, 9,363 lines | CC BY 4.0 |
 | [OpenHand-Synth](https://huggingface.co/datasets/to-be/OpenHand-Synth) | Synthetic pipeline smoke test only | Pinned 27-line subset | CC BY 4.0 |
+| [CSAFE Handwriting Database](https://doi.org/10.25380/iastate.10062203.v2) | Real adult-handwriting pipeline smoke test only | Pinned 9-writer, 19-line subset | CC BY 4.0 |
 | Synthetic Augmented | Blur, shadow, glare, rotation | Generated on-the-fly | N/A |
 | Consented Pilot Set | Production-like evaluation | TBD (pilot phase) | Private |
 
 See the [dataset contract](docs/data_contract.md) for normalized labels, provenance fields,
-source hashing, the reproducible public smoke subset, and deterministic writer-independent split
-generation. Synthetic smoke results are plumbing evidence, not student-handwriting benchmarks.
+source hashing, the reproducible public smoke subsets, and deterministic writer-independent split
+generation. Synthetic and adult-handwriting smoke results are plumbing evidence, not
+student-handwriting benchmarks.
 
 ## 🔬 Model Architecture
 
@@ -223,10 +225,11 @@ benchmark report because a locked, writer-isolated real handwriting gold set has
 published. See the [evaluation contract](docs/evaluation.md) for the input schema and release-gate
 workflow.
 
-The repository does contain one
+The repository contains a
 [captured synthetic TrOCR smoke result](artifacts/smoke/openhand-synth-trocr-base-v1/README.md)
-that proves the pipeline runs end to end. Its six generated name/date lines are deliberately
-excluded from benchmark claims.
+and a [captured real adult-handwriting smoke result](artifacts/smoke/csafe-real-trocr-base-v1/README.md)
+that prove the pipeline runs end to end. Both are deliberately excluded from student-handwriting
+benchmark claims; the next evidence level requires independently verified child/student gold data.
 
 | Category | Metrics |
 |----------|--------|
