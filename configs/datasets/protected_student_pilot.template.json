@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "pilot_id": "pilot-template-not-approved",
+  "data_stage": "normalized_line_gold_candidate",
+  "jurisdiction": "AU-VIC",
+  "approval": {
+    "privacy_review_status": "pending",
+    "privacy_review_reference": "replace_me",
+    "educator_approval_status": "pending",
+    "educator_approval_reference": "replace_me",
+    "accountable_owner_role": "replace_me",
+    "consent": {
+      "status": "pending",
+      "authority": "parent_guardian",
+      "capacity_assessment_complete": false,
+      "collection_purpose": "handwriting_ocr_shadow_evaluation",
+      "evaluation_allowed": false,
+      "training_allowed": false,
+      "publication_allowed": false,
+      "withdrawal_process_documented": false,
+      "consent_records_separate_from_dataset": true,
+      "verified_at": "replace_me"
+    }
+  },
+  "privacy": {
+    "direct_identifiers_removed": false,
+    "visual_identifier_review_complete": false,
+    "image_metadata_removed": false,
+    "filename_policy": "opaque_sample_id",
+    "writer_id_policy": "opaque_pseudonym",
+    "allowed_demographics": [
+      "age_band"
+    ],
+    "public_repository_allowed": false,
+    "github_actions_allowed": false,
+    "third_party_ai_upload_allowed": false,
+    "automated_education_decisions_allowed": false
+  },
+  "storage": {
+    "location_class": "approved_private",
+    "encryption_at_rest": false,
+    "encryption_in_transit": false,
+    "access_control": "named_least_privilege",
+    "audit_logging": false,
+    "backup_copies_in_retention_scope": false,
+    "cross_border_disclosure": "none",
+    "raw_source_retention_days": 30,
+    "normalized_candidate_retention_days": 180,
+    "deletion_on_withdrawal_days": 30,
+    "deletion_method": "verified_secure_deletion_or_deidentification",
+    "deletion_verification_owner_role": "replace_me"
+  },
+  "annotation": {
+    "review_filename": "annotation_review.csv",
+    "guideline_version": "inkbridge-annotation-v2",
+    "independent_annotators_per_sample": 2,
+    "blind_first_passes": true,
+    "model_preannotations_allowed": false,
+    "adjudication_required_on_disagreement": true,
+    "adjudicator_must_be_independent": true,
+    "crop_boundary_review_required": true
+  },
+  "gold": {
+    "minimum_distinct_writers": 3,
+    "writer_isolation_required": true,
+    "split_locked_before_model_selection": true,
+    "test_set_training_access_allowed": false,
+    "gold_ready": false
+  }
+}

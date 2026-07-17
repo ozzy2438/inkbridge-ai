@@ -1,79 +1,135 @@
-# InkBridge AI — Annotation Guidelines
+# InkBridge AI — Annotation Guidelines v2
 
-## Purpose
-This document defines the standards for transcribing student handwriting samples in the InkBridge AI system.
+## Purpose and boundary
 
-## Core Rules
+These rules define how protected handwriting samples become gold-candidate transcriptions. A gold
+candidate receives two blind human passes and, when needed, independent adjudication. It is not a
+locked gold set until writer-isolated splits are frozen and approved.
 
-### 1. Fidelity to Original
-- Transcribe EXACTLY what is written
-- Do NOT correct spelling errors
-- Do NOT correct grammar
-- Preserve original capitalization
-- Preserve original punctuation
+Model suggestions are disabled during gold creation to prevent anchoring bias. Model-assisted
+pre-annotation may be used later for operational labelling, but those records must stay separate
+from the locked evaluation set.
 
-### 2. Cross-outs
-- Still transcribe crossed-out text
-- Mark with tag: `[CROSSED: text here]`
-- If unreadable under cross-out: `[CROSSED: UNREADABLE]`
+## Roles
 
-### 3. Insertions
-- Text added between lines or in margins
-- Mark with: `[INSERT: text here]`
-- Note position indicator: `[INSERT@line3: text]`
+- **Annotator 1 and Annotator 2:** transcribe independently and cannot see each other's work.
+- **Adjudicator:** resolves disagreements and must be different from both annotators.
+- **Educator/domain reviewer:** decides ambiguous classroom conventions and approves the guideline.
+- **Data owner:** controls access, consent withdrawal, retention, and deletion evidence.
+- **ML owner:** maintains schemas and metrics but cannot silently change a gold reference.
 
-### 4. Unreadable Text
-- If genuinely cannot be read: `[UNREADABLE]`
-- If partially readable: `[PARTIAL: wh_t I c_n read]`
-- Use underscore for unreadable characters
+Annotator and writer identifiers are opaque pseudonyms. Names, emails, student IDs, dates of birth,
+consent records, and approval documents never belong in the normalized dataset.
 
-### 5. Reading Order
-- Top to bottom, left to right (default)
-- Follow numbered sections if present
-- Insertions placed at intended position
+## Transcription rules
 
-### 6. Printed vs Handwritten
-- Mark region type during annotation
-- Printed questions: mark as `printed_text`
-- Student answers: mark as `student_handwriting`
-- Teacher marks: mark as `teacher_annotation`
+### Fidelity to the original
 
-### 7. Special Cases
-| Situation | Action |
-|-----------|--------|
-| Mathematical notation | Transcribe in plain text: "x^2 + 3x = 0" |
-| Drawings/diagrams | Mark as `diagram_non_text` |
-| Arrows/symbols | Describe: "[ARROW pointing right]" |
-| Blank page | Mark as blank, no transcription |
-| Multiple languages | Transcribe as-is, flag for review |
+- Transcribe exactly what is visible; do not correct spelling or grammar.
+- Preserve capitalization, punctuation, spacing that changes meaning, and paragraph boundaries.
+- Do not expand abbreviations or infer a word from the essay topic.
+- Do not copy a printed prompt into the student-handwriting transcript.
 
-## Quality Metrics
+### Crop boundaries
 
-### Agreement Rate
-- Target: >90% inter-annotator agreement
-- Measured at character level
+- Include the complete target line and every mark that belongs to it.
+- Exclude adjacent lines, student names/headers, teacher marks, and printed questions.
+- Mark `crop_boundary_disagreement` when the correct boundary is uncertain.
+- A crop is not eligible until both annotators confirm `crop_reviewed=true`.
 
-### Adjudication Rules
-- If two annotators disagree by >10 characters: escalate
-- Senior annotator makes final decision
-- Decision and reasoning recorded
+### Cross-outs
 
-### Speed Targets
-- Target: 4-6 pages per hour per annotator
-- Quality over speed always
-- Report if consistently below target
+- Preserve readable crossed-out text as `[CROSSED: text here]`.
+- Use `[CROSSED: UNREADABLE]` when the underlying text cannot be recovered.
+- Do not replace a crossed-out word with a later correction; record both in reading order.
 
-## Failure Category Tagging
+### Insertions and reading order
 
-When a model prediction is incorrect, tag the failure:
+- Place an insertion at its intended reading position when a caret or clear marker identifies it.
+- Encode it as `[INSERT@line3: text]`, using the target line number.
+- If intent is ambiguous, preserve visual order and escalate as `reading_order_disagreement`.
 
-| Category | Description | Example |
-|----------|-------------|---------|
-| `faint_pencil` | Writing too light to read | Light HB pencil on white paper |
-| `joined_cursive` | Letters connected, hard to segment | Flowing cursive writing |
-| `crossed_out` | Struck-through text | Single/double line through words |
-| `margin_insertion` | Text in margins/between lines | Caret insertions |
-| `touching_lines` | Adjacent lines overlap | Cramped writing |
-| `mixed_content` | Printed and handwritten together | Question + answer |
-| `heavy_blur` | Camera blur | Motion or defocus blur |
-| `perspective` | Severe angle | Phone photo from side |
+### Unreadable and partially readable text
+
+- Use `[UNREADABLE]` only after zoom/contrast inspection cannot resolve a token.
+- Use `[PARTIAL: wh_t]` for a partly legible token; one underscore represents each unknown
+  character where count is discernible.
+- Never guess a likely word to improve fluency.
+
+### Printed, student, and teacher content
+
+- `printed_text`: questions, headers, ruled-form labels, or machine-printed content.
+- `student_handwriting`: the target student's answer.
+- `teacher_annotation`: ticks, scores, comments, or corrections from an educator.
+- `diagram_non_text`: drawings or diagrams without a transcription target.
+
+Mixed authorship is escalated as `region_type_disagreement`; annotators must not infer authorship
+from ink colour alone.
+
+### Special cases
+
+| Situation | Required action |
+|---|---|
+| Mathematical notation | Preserve in plain text, for example `x^2 + 3x = 0` |
+| Arrow or symbol | Use a concise token such as `[ARROW_RIGHT]` |
+| Blank crop/page | Reject from line gold data; record as a document-quality case |
+| Multiple languages | Transcribe as visible and flag `multilingual_review` |
+| Ambiguous punctuation | Transcribe the visible mark; escalate if annotators disagree |
+| Student identity in crop | Stop annotation and return the sample for de-identification |
+
+## Independent review protocol
+
+1. The data owner assigns opaque sample IDs and removes direct/visual identifiers and image
+   metadata.
+2. Annotator 1 and Annotator 2 work blind, without model pre-annotations.
+3. Each pass stores a SHA-256 of its exact UTF-8 transcription and time spent.
+4. Exact agreement is recorded as `agreed`; both pass hashes and final hash must match.
+5. Disagreement is recorded as `adjudicated`, with an independent adjudicator, controlled reason,
+   final-transcript hash, and adjudication time.
+6. The final hash must match the exact text in `labels.csv`.
+7. The protected-pilot gate verifies every sample before producing a PII-free audit.
+
+Allowed adjudication reasons are:
+
+- `transcription_disagreement`
+- `uncertain_character`
+- `reading_order_disagreement`
+- `crop_boundary_disagreement`
+- `region_type_disagreement`
+
+The adjudicator records a concise rationale in the protected annotation system. The public audit
+contains only counts, rates, and hashes—not rationale text, student content, or worker identities.
+
+## Quality and operations metrics
+
+- Exact agreement rate
+- Adjudication rate
+- Total review hours and samples per review hour
+- Correction time per page during a later shadow pilot
+- Rework rate after educator review
+- Agreement and error rate by failure slice
+
+No fixed agreement target can make a dataset gold by itself. Low agreement triggers guideline or
+sample-quality review; it must not be hidden by adjudication.
+
+## Failure-category tagging
+
+| Category | Description |
+|---|---|
+| `faint_pencil` | Writing too light to read reliably |
+| `joined_cursive` | Connected letters are difficult to segment |
+| `crossed_out` | Struck-through text is present |
+| `margin_insertion` | Text appears between lines or in margins |
+| `touching_lines` | Adjacent lines overlap |
+| `mixed_content` | Printed and handwritten content coexist |
+| `heavy_blur` | Motion or defocus blur obscures writing |
+| `perspective` | Camera angle causes severe distortion |
+| `teacher_annotation` | Teacher marks overlap student writing |
+| `missing_page_edge` | Capture truncates relevant content |
+
+## Promotion boundary
+
+A package that passes annotation review is only `gold_candidate_ready`. Promotion requires a
+writer-isolated, versioned manifest frozen before model selection; a locked test set must never be
+used for training, threshold tuning, prompt selection, or manual reference changes without a new
+dataset version.

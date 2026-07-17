@@ -133,6 +133,17 @@ Public dataset licence fields in configuration are provenance defaults, not lega
 particular use. Verify the source terms before downloading, training, redistributing, or using a
 dataset commercially.
 
+## Protected student-pilot boundary
+
+Private child/student data must first pass the
+[protected pilot gate](pilot_governance.md). The gate requires an approved contract, purpose-scoped
+consent evidence, repository-external protected storage, opaque sample/writer identifiers, stripped
+image metadata, and two blind human transcriptions with independent adjudication on disagreement.
+
+Passing produces `gold_candidate_ready`, not `gold_ready`. Do not build or freeze a private gold
+manifest until the candidate population is owner-approved and the split-access policy is in place.
+The public dataset manifest examples above do not grant permission to process student data.
+
 ## Hosted workflow boundary
 
 The `Baseline Predictions` GitHub workflow accepts only a package whose root contains

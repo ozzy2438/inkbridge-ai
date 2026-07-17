@@ -11,7 +11,8 @@
 InkBridge AI is currently an **alpha research and engineering prototype**, not a
 production deployment. The repository contains a baseline TrOCR inference path,
 heuristic image-quality and layout components, API scaffolding, an offline evaluation
-harness, a resumable pretrained TrOCR prediction producer, and annotation workflow design.
+harness, a resumable pretrained TrOCR prediction producer, and a fail-closed protected-pilot
+governance and double-annotation gate.
 
 The following claims are intentionally deferred until reproducible artifacts exist:
 
@@ -197,6 +198,10 @@ source hashing, the reproducible public smoke subsets, and deterministic writer-
 generation. Synthetic and adult-handwriting smoke results are plumbing evidence, not
 student-handwriting benchmarks.
 
+The [protected student-pilot gate](docs/pilot_governance.md) defines the separate path for consented
+child/student data. Its template is intentionally unapproved; no private data or consent record is
+included in this repository.
+
 ## 🔬 Model Architecture
 
 ### Current baseline: pretrained TrOCR
@@ -244,13 +249,16 @@ benchmark claims; the next evidence level requires independently verified child/
 
 - Use only licensed, synthetic, or explicitly consented and de-identified examples
 - Do not use uploaded data for training without explicit authorization
-- Implement and verify retention, deletion, access control, audit logging, and tenant isolation before a pilot
+- Implement and verify retention, deletion, access control, audit logging, and tenant isolation
+  before a pilot
+- Keep student packages outside Git and GitHub-hosted workflows; require two blind gold passes
 - Calibrate abstention before enabling automatic acceptance
 - Do not represent the prototype as GDPR- or production-compliant without a formal assessment
 
 ## 📋 Roadmap
 
-- [ ] Week 1-2: Problem discovery, data governance, locked gold set, baselines **(in progress)**
+- [ ] Week 1-2: Problem discovery, data governance, locked gold set, baselines
+  **(governance gate and smoke baselines complete; consented gold pending)**
 - [ ] Week 3-4: Quality gate, layout segmentation, TrOCR baseline **(prototype implemented; validation pending)**
 - [ ] Week 5-6: Domain fine-tuning, failure analysis, calibration
 - [ ] Week 7: VLM fallback & structured JSON SFT

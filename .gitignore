@@ -23,6 +23,10 @@ build/
 data/raw/
 data/processed/
 data/gold_test/
+data/pilot/
+pilot_intake.json
+annotation_review.csv
+pilot_intake.audit.json
 model_cache/
 checkpoints/
 onnx_models/

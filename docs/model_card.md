@@ -40,20 +40,21 @@ they have already been downloaded, transformed, split, or used for training.
 
 ### Evaluation Results
 
-No InkBridge evaluation run has been completed. Results will be added only with a
-reproducible evaluation artifact and dataset/split manifest.
+Two reproducible engineering smoke runs exist for the pinned pretrained checkpoint. Neither is a
+student-handwriting gold benchmark, model comparison, or release-gate baseline.
 
-| Metric | Baseline | Fine-tuned | Improvement |
-|--------|----------|------------|-------------|
-| CER (IAM test) | Not measured | Not trained | N/A |
-| CER (GNHK test) | Not measured | Not trained | N/A |
-| CER (SMHD test) | Not measured | Not trained | N/A |
-| False Confidence Rate | Not measured | Not trained | N/A |
-| Calibration Error | Not measured | Not trained | N/A |
+| Set | Population | Test lines | CER | WER | False confidence |
+|---|---|---:|---:|---:|---:|
+| OpenHand-Synth smoke | Synthetic rendering styles | 6 | 0.0556 | 0.5000 | 0.6667 |
+| CSAFE smoke | Real adult writers | 5 | 0.0584 | 0.3214 | 0.5000 |
+
+Raw predictions, runtime/model provenance, manifest hashes, and evaluation reports are stored under
+`artifacts/smoke/`. No fine-tuned model or independently verified child/student result exists.
 
 ### Ethical Considerations
 - No private student data is included in this public repository
-- A future pilot requires explicit consent, de-identification, access control, and retention rules
+- A future pilot must pass the protected governance and double-annotation gate; a software pass is
+  not a legal/privacy certification
 - Abstention thresholds must be calibrated before operational use
 - Not used for automated grading or student assessment
 - Human review required for all uncertain predictions

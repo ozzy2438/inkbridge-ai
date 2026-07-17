@@ -1,0 +1,93 @@
+# Protected Student-Handwriting Pilot Gate
+
+## What this gate proves
+
+InkBridge refuses to ingest a private child/student gold candidate unless its package supplies
+machine-checkable evidence for approval, consent scope, de-identification, protected storage,
+retention/deletion, and two independent human transcriptions. The validator emits only hashes,
+counts, and aggregate review metrics.
+
+Passing this gate is **not legal advice, a privacy certification, or permission to run a pilot**.
+The named data controller, educator, and privacy owner remain responsible for approvals and the
+facts asserted by the contract. The software can verify a signed-off field and a dataset property;
+it cannot verify that a consent conversation was valid.
+
+## Why these controls exist
+
+The Victorian Department of Education warns that generative-AI tools can request or receive
+student personal, sensitive, or health information and that uploads can create privacy and data
+protection risks. Private student data therefore cannot use the public demo or GitHub-hosted model
+workflows.
+
+The Australian Privacy Principles require reasonable safeguards against misuse, loss, unauthorised
+access, modification, and disclosure, and require destruction or de-identification when personal
+information is no longer needed. OAIC guidance also says a young person's capacity to consent is
+case-specific; a parent or guardian may need to consent, and the child should still be involved as
+far as practicable.
+
+Official references:
+
+- [Victorian Department of Education: Protecting privacy and personal data](https://www2.education.vic.gov.au/pal/generative-artificial-intelligence/guidance/protecting-privacy-and-personal-data)
+- [OAIC: Australian Privacy Principles](https://www.oaic.gov.au/privacy/australian-privacy-principles/read-the-australian-privacy-principles)
+- [OAIC APP 11: Security, destruction, and de-identification](https://www.oaic.gov.au/privacy/australian-privacy-principles/australian-privacy-principles-guidelines/chapter-11-app-11-security-of-personal-information)
+- [OAIC: Consent capacity for children and young people](https://www.oaic.gov.au/privacy/australian-privacy-principles/australian-privacy-principles-guidelines/chapter-b-key-concepts)
+
+## Package layout
+
+The real package stays outside the Git checkout in approved private storage:
+
+```text
+/protected/inkbridge/pilot-001/
+├── images/
+│   ├── sample-<opaque-hex>.png
+│   └── ...
+├── labels.csv
+├── annotation_review.csv
+└── pilot_intake.json
+```
+
+Copy `configs/datasets/protected_student_pilot.template.json` into protected storage and replace
+every pending/placeholder field with an approved internal reference or verified setting. The
+template deliberately fails validation and contains no approval.
+
+Run the gate locally in the controlled environment:
+
+```bash
+python -m scripts.validate_protected_pilot \
+  --contract /protected/inkbridge/pilot-001/pilot_intake.json \
+  --dataset-dir /protected/inkbridge/pilot-001
+```
+
+The result, `pilot_intake.audit.json`, is stored beside the protected package. It contains no
+transcripts, writer IDs, annotator IDs, or source images. Do not upload the package or audit to
+GitHub Actions; the audit hashes still describe sensitive data and remain protected provenance.
+
+## Fail-closed checks
+
+- Dataset, contract, review file, and audit must be outside the Git repository.
+- Contract and review files cannot be symlinks.
+- Privacy and educator approval must be `approved`; consent must be active and purpose-specific.
+- Consent authority and capacity assessment are explicit; consent records stay outside the data.
+- Publication, public-repository upload, GitHub Actions, third-party AI upload, and automated
+  educational decisions are disabled.
+- Raw retention is at most 30 days, normalized-candidate retention at most 180 days, and verified
+  deletion/de-identification after withdrawal is at most 30 days. These are conservative InkBridge
+  pilot-policy ceilings, not statutory periods; an approved pilot may set shorter periods.
+- Only opaque filenames/writer IDs and coarse age bands are allowed.
+- Indexed images exactly match `images/`, contain no EXIF/text metadata, and cannot be symlinks.
+- Every final transcript has two blind passes and a crop review.
+- Disagreement requires an independent adjudicator, controlled reason, and recorded time.
+- At least three writers are required so a later train/validation/test split can be writer-isolated.
+
+## What remains after a pass
+
+The audit status is `gold_candidate_ready`, while `gold_ready` remains false. The next gate must:
+
+1. obtain explicit owner approval for the final candidate population;
+2. create and freeze a versioned writer-isolated manifest;
+3. deny training, prompt selection, and threshold tuning access to the locked test split;
+4. run evaluation only on protected/self-hosted infrastructure;
+5. record withdrawal/deletion events across primary storage and backups.
+
+No real student image, transcript, manifest, consent record, or annotation review is committed to
+this public repository.
