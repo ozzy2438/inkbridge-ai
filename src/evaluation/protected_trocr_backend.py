@@ -69,6 +69,7 @@ class ProtectedTrOCRPredictionBackend:
             "network_access_allowed": False,
             "external_ai_service": False,
             "remote_code_allowed": False,
+            "processor_use_fast": False,
             "runtime": {
                 "python": platform.python_version(),
                 "os": platform.system(),

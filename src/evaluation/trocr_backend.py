@@ -67,6 +67,7 @@ class TrOCRPredictionBackend:
             "max_length": max_length,
             "confidence_threshold": confidence_threshold,
             "abstention_threshold": abstention_threshold,
+            "processor_use_fast": False,
             "runtime": {
                 "python": platform.python_version(),
                 "os": platform.system(),

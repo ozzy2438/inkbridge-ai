@@ -12,6 +12,7 @@ pytest.importorskip("torch")
 
 from src.evaluation import protected_trocr_backend, trocr_backend
 from src.evaluation.protected_trocr_backend import ProtectedTrOCRPredictionBackend
+from src.evaluation.research_trocr_backend import ResearchTrOCRPredictionBackend
 from src.evaluation.trocr_backend import TrOCRPredictionBackend
 
 
@@ -88,3 +89,25 @@ def test_protected_backend_loads_only_the_materialized_local_model(
     assert FakeProtectedEngine.kwargs["local_files_only"] is True
     assert backend.provenance["network_access_allowed"] is False
     assert backend.provenance["remote_code_allowed"] is False
+    assert backend.provenance["processor_use_fast"] is False
+
+
+def test_research_backend_does_not_claim_protected_pilot_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    model_dir = tmp_path / "sealed-model"
+    model_dir.mkdir()
+    monkeypatch.setattr(protected_trocr_backend, "TrOCREngine", FakeProtectedEngine)
+
+    backend = ResearchTrOCRPredictionBackend(
+        model_dir=model_dir,
+        model_version="trocr-research-v1",
+        model_artifact_sha256="c" * 64,
+        device="cpu",
+        batch_size=2,
+        use_fp16=False,
+    )
+
+    assert backend.provenance["backend"] == "trocr_local_research"
+    assert backend.provenance["evidence_scope"] == "noncommercial_research_rehearsal_only"
+    assert backend.provenance["protected_pilot_evidence"] is False

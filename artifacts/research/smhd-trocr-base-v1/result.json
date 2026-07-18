@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "status": "captured",
+  "generated_at": "2026-07-18T04:21:26.674905+00:00",
+  "evidence_scope": "noncommercial_research_rehearsal_only",
+  "dataset": {
+    "name": "smhd-research-rehearsal",
+    "version": "figshare-24419986-v1-selection-v1",
+    "license_id": "CC-BY-NC-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "split": "test",
+    "num_samples": 6,
+    "num_writers": 2,
+    "publisher_hash_marker_samples": 3,
+    "publisher_no_hash_marker_samples": 3,
+    "manifest_sha256": "7dfae6bbfb1f5b3c6170c2d18a076ab672d6bc684a2b85a514e48defb4705824",
+    "manifest_metadata_sha256": "95f1dc5d28c9f192f51ea9610d48044a9d7d64cc4c3fe9c244670ecbc53f2d73",
+    "evaluation_set_sha256": "d578516a115e29e4467168d2dbe7a51254253242f8ef52e3159b9a0cb287d098",
+    "reference_status": "publisher_transcription_unreviewed"
+  },
+  "model": {
+    "model_version": "microsoft-trocr-base-handwritten-eaacaf452b06415df8f10bb6fad3a4c11e609406-smhd-research-v1",
+    "model_artifact_sha256": "8215ca7b0e4536affbc01a5718abae5d572cf011b0e709953e57eb0a1be92149",
+    "num_files": 8,
+    "total_bytes": 1334746073,
+    "read_only": true,
+    "device": "cpu",
+    "dtype": "float32",
+    "batch_size": 2,
+    "beam_width": 4,
+    "max_length": 128,
+    "confidence_threshold": 0.7,
+    "abstention_threshold": 0.4,
+    "processor_use_fast": false,
+    "runtime": {
+      "machine": "arm64",
+      "os": "Darwin",
+      "os_release": "27.0.0",
+      "python": "3.14.4",
+      "torch": "2.13.0",
+      "transformers": "4.57.6"
+    }
+  },
+  "execution": {
+    "local_files_only": true,
+    "network_access_allowed": false,
+    "python_socket_guard_enabled": true,
+    "external_ai_service": false,
+    "github_actions_allowed": false,
+    "predictions_sha256": "9aa88a1f43fba2d5857dbcfa1d0816150705857640bf0cc43253d44a0e1696e6",
+    "sample_level_artifacts_committed": false,
+    "uncertain_predictions": 1,
+    "unreadable_predictions": 0
+  },
+  "evaluation": {
+    "config_sha256": "e1e8e4dedf2d0b93bcd1e08ea629310147cb313b184efa469339ac10eefaf82d",
+    "metrics": {
+      "cer": 0.13,
+      "wer": 0.3611111111111111,
+      "normalized_edit_distance": 0.13452809892438375,
+      "mean_confidence": 0.8573377331097921,
+      "calibration_error": 0.857337733109792,
+      "false_confidence_rate": 1.0,
+      "abstention_rate": 0.0,
+      "valid_output_rate": 1.0,
+      "p50_latency_ms": 1872.4764795006195,
+      "p95_latency_ms": 1874.563229001069,
+      "samples_per_minute": 33.99923484192824
+    },
+    "slices": {
+      "publisher_hash_marker": {
+        "num_samples": 3,
+        "cer": 0.18181818181818182,
+        "wer": 0.3888888888888889,
+        "normalized_edit_distance": 0.18595629121944912,
+        "mean_confidence": 0.8138683040936788,
+        "false_confidence_rate": 0.0
+      },
+      "publisher_no_hash_marker": {
+        "num_samples": 3,
+        "cer": 0.08928571428571429,
+        "wer": 0.3333333333333333,
+        "normalized_edit_distance": 0.08309990662931839,
+        "mean_confidence": 0.9008071621259054,
+        "false_confidence_rate": 1.0
+      }
+    }
+  },
+  "load_observation": {
+    "encoder_pooler_weights_reported_newly_initialized": true,
+    "interpretation": "Transformers reported unused encoder pooler parameters; the result is retained as a development baseline and not a release claim."
+  },
+  "claims": {
+    "gold_benchmark": false,
+    "production_pilot_evidence": false,
+    "commercial_use_evidence": false,
+    "protected_pilot_substitute": false,
+    "primary_school_accuracy": false
+  }
+}

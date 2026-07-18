@@ -95,8 +95,16 @@ it remains pipeline evidence—not a gold set or a claim about child/student han
 The repository also contains a pinned adapter for a 12-writer, 36-line SMHD student-handwriting
 research rehearsal. Its normalized package and writer-isolated manifest must remain outside Git.
 The publisher references are unreviewed and CC BY-NC 4.0 limits use to non-commercial purposes, so
-any later offline prediction result must be labelled research-only. No SMHD prediction or metric is
-reported here yet, and such a run would not substitute for the protected-pilot gate.
+its [captured offline result](../artifacts/research/smhd-trocr-base-v1/README.md) is labelled
+research-only. The sealed local TrOCR baseline produced CER 0.1300 and WER 0.3611 on six test lines;
+the sample-level package and predictions remain outside Git. The result does not substitute for the
+protected-pilot gate or an independently reviewed gold set.
+
+The SMHD research producer rejects CI, repository-contained data/output, group/world-accessible
+storage, model hash drift, writable/pickle model artifacts, licence/manifest drift, and gold or
+production claims. It loads the processor/model with `local_files_only=True`, enables offline
+library flags, and blocks new Python socket connections. `result.json` retains only aggregate
+metrics, runtime facts, and hashes.
 
 ## GitHub Actions
 

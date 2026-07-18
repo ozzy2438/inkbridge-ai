@@ -94,6 +94,7 @@ class TrOCREngine:
             self.model_path,
             revision=self.revision,
             local_files_only=self.local_files_only,
+            use_fast=False,
         )
         self._model = VisionEncoderDecoderModel.from_pretrained(
             self.model_path,
@@ -203,9 +204,7 @@ class TrOCREngine:
                 raise RuntimeError("TrOCR confidence output does not match decoded sequences")
 
             # Extract confidence scores
-            for raw_text, bbox, confidence_result in zip(
-                texts, batch_bboxes, confidences
-            ):
+            for raw_text, bbox, confidence_result in zip(texts, batch_bboxes, confidences):
                 confidence, token_confs = confidence_result
 
                 is_uncertain = confidence < self.confidence_threshold

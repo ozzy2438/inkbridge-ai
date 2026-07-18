@@ -16,7 +16,8 @@ governance/double-annotation gate with sealed local-model inference and a writer
 aggregate-only self-hosted evaluation path. The protected path also enforces an owner-only POSIX
 storage boundary and hash-chained consent-withdrawal/primary-and-backup-deletion evidence. A
 separate fail-closed adapter now prepares a small, local-only SMHD student-handwriting research
-rehearsal without treating it as protected-pilot or gold-set evidence.
+rehearsal without treating it as protected-pilot or gold-set evidence. A sealed-model, socket-
+blocked local producer has now captured the first aggregate-only TrOCR result on that rehearsal.
 
 The following claims are intentionally deferred until reproducible artifacts exist:
 
@@ -240,8 +241,8 @@ withdrawal state, and deletion evidence into every downstream artifact.
 
 The offline evaluator validates prediction JSONL artifacts, hashes its inputs, and computes the
 implemented metrics below. A separate producer can now capture pretrained TrOCR predictions from a
-licensed line-level manifest. The repository still has no child/student model benchmark because no
-authorised, independently verified protected pilot has been run. See the
+licensed line-level manifest. The repository still has no independently verified child/student gold
+benchmark because no authorised protected pilot has been run. See the
 [evaluation contract](docs/evaluation.md) for the public input schema and release-gate workflow,
 and the [protected evaluation contract](docs/protected_evaluation.md) for private shadow
 evaluation.
@@ -250,9 +251,12 @@ The repository contains a
 [captured synthetic TrOCR smoke result](artifacts/smoke/openhand-synth-trocr-base-v1/README.md)
 and a [captured real adult-handwriting smoke result](artifacts/smoke/csafe-real-trocr-base-v1/README.md)
 that prove the pipeline runs end to end. Both are deliberately excluded from student-handwriting
-benchmark claims. A local-only SMHD research manifest is now ready for a later offline baseline
-run, but no SMHD metric is claimed; the next gold evidence level still requires independently
-verified, authorised child/student data.
+benchmark claims. The
+[SMHD offline research result](artifacts/research/smhd-trocr-base-v1/README.md) adds the first real
+student-handwriting model run: six unreviewed, writer-isolated lines processed from a sealed local
+model with no network access. Its CER is 0.1300 and WER is 0.3611, but it is non-commercial research
+evidence—not a gold benchmark or protected pilot. The next gold evidence level still requires
+independently verified, authorised child/student data.
 
 | Category | Metrics |
 |----------|--------|
@@ -279,7 +283,8 @@ verified, authorised child/student data.
 
 - [ ] Week 1-2: Problem discovery, data governance, locked gold set, baselines
   **(governance, local-IAM/lifecycle, freeze/sealed-inference/self-hosted eval gates, and smoke
-  baselines complete; real consented gold and independent infrastructure evidence pending)**
+  baselines plus an offline SMHD research baseline complete; real consented gold and independent
+  infrastructure evidence pending)**
 - [ ] Week 3-4: Quality gate, layout segmentation, TrOCR baseline **(prototype implemented; validation pending)**
 - [ ] Week 5-6: Domain fine-tuning, failure analysis, calibration
 - [ ] Week 7: VLM fallback & structured JSON SFT

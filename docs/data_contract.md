@@ -159,8 +159,29 @@ python -m scripts.build_dataset_manifest \
 This is a non-commercial, offline research rehearsal. It is not a consented production pilot,
 commercial-use evidence, a child/primary-school benchmark, or an approved training set. Do not
 commit its normalized data, labels, manifest, predictions, or sample-level evaluation artifacts;
-do not send them through GitHub-hosted Actions. A later offline inference run must preserve these
+do not send them through GitHub-hosted Actions. Any offline inference run must preserve these
 boundaries and report its result separately from protected-pilot evidence.
+
+After staging a code-free, read-only local TrOCR directory and recording its artifact SHA-256, run
+the fixed test split without Hub resolution or network access:
+
+```bash
+python -m scripts.run_offline_research_inference \
+  --dataset-dir /private/research/smhd-line-v1/normalized-v1 \
+  --output-dir /private/research/smhd-line-v1/runs/trocr-base-v1 \
+  --model-dir /private/models/trocr-base-handwritten-<revision> \
+  --model-version microsoft-trocr-base-handwritten-<revision>-smhd-research-v1 \
+  --model-artifact-sha256 <sealed-directory-sha256> \
+  --device cpu \
+  --batch-size 2 \
+  --beam-width 4 \
+  --max-length 128
+```
+
+The command refuses CI and revalidates the dataset and sealed model after inference. It keeps
+sample-level predictions owner-only and emits an aggregate-safe execution attestation. The
+[captured v1 result](../artifacts/research/smhd-trocr-base-v1/README.md) records six real test lines
+from two isolated writers; it remains unreviewed, non-commercial research evidence.
 
 ## Build the manifest
 

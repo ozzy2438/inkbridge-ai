@@ -45,13 +45,13 @@ def offline_inference_environment() -> Iterator[None]:
 
     class OfflineSocket(original_socket):  # type: ignore[misc, valid-type]
         def connect(self, address: Any) -> None:
-            raise RuntimeError("Protected inference blocked an outbound socket connection")
+            raise RuntimeError("Offline inference blocked an outbound socket connection")
 
         def connect_ex(self, address: Any) -> int:
-            raise RuntimeError("Protected inference blocked an outbound socket connection")
+            raise RuntimeError("Offline inference blocked an outbound socket connection")
 
     def blocked_create_connection(*args: Any, **kwargs: Any) -> None:
-        raise RuntimeError("Protected inference blocked an outbound socket connection")
+        raise RuntimeError("Offline inference blocked an outbound socket connection")
 
     try:
         os.environ.update(_OFFLINE_ENVIRONMENT)
