@@ -43,8 +43,15 @@ The real package stays outside the Git checkout in approved private storage:
 │   └── ...
 ├── labels.csv
 ├── annotation_review.csv
-└── pilot_intake.json
+├── pilot_intake.json
+├── protected_storage_control.json
+└── protected_lifecycle_events.jsonl
 ```
+
+First prepare and owner-approve the repository-external storage boundary described in
+[protected storage and lifecycle evidence](protected_storage_lifecycle.md). The intake gate now
+requires owner-only POSIX permissions, a current read-only storage control, a valid hash-chained
+lifecycle ledger, no open consent withdrawal, and no deletion deadline breach.
 
 Copy `configs/datasets/protected_student_pilot.template.json` into protected storage and replace
 every pending/placeholder field with an approved internal reference or verified setting. The
@@ -65,6 +72,11 @@ GitHub Actions; the audit hashes still describe sensitive data and remain protec
 ## Fail-closed checks
 
 - Dataset, contract, review file, and audit must be outside the Git repository.
+- The storage control and lifecycle ledger must pass the protected storage/IAM boundary; all tree
+  entries deny group/other access and no symlink is allowed.
+- Storage approval is valid for at most 90 days and retention settings exactly match the pilot
+  contract.
+- An open consent withdrawal or deletion deadline breach blocks intake and all downstream gates.
 - Contract and review files cannot be symlinks.
 - Privacy and educator approval must be `approved`; consent must be active and purpose-specific.
 - Consent authority and capacity assessment are explicit; consent records stay outside the data.
@@ -93,10 +105,12 @@ The audit status is `gold_candidate_ready`, while `gold_ready` remains false. Th
 5. rejects hosted CI, reference-bearing prediction exports, and external-AI execution;
 6. joins protected references only in memory and persists aggregate metrics only.
 
-The remaining operational work is to connect an approved private storage/access-control system,
-run an authorised real pilot on self-hosted inference, and record withdrawal/deletion events across
-primary storage and backups. A frozen pilot set still reports `gold_ready: false`; size, coverage,
-owner acceptance, and evaluation evidence must be reviewed before any final gold or release claim.
+The code now verifies an owner-only self-hosted POSIX boundary and hash-chained withdrawal/primary-
+and backup-deletion evidence. Production still needs independent proof for encryption, provider IAM,
+network controls, immutable audit-log retention, and actual backup erasure. The remaining evidence
+step is an authorised real pilot with independently reviewed data. A frozen pilot set still reports
+`gold_ready: false`; size, coverage, owner acceptance, and evaluation evidence must be reviewed
+before any final gold or release claim.
 
 No real student image, transcript, manifest, consent record, or annotation review is committed to
 this public repository.

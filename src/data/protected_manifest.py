@@ -41,6 +41,7 @@ _AUDIT_COMPARISON_FIELDS = {
     "input",
     "counts",
     "annotation_quality",
+    "storage_boundary",
     "next_gate",
 }
 _METADATA_FIELDS = {
@@ -110,6 +111,12 @@ def freeze_protected_evaluation(
             "annotation_review_sha256": fresh_audit["input"][
                 "annotation_review_sha256"
             ],
+            "storage_control_sha256": fresh_audit["storage_boundary"][
+                "storage_control_sha256"
+            ],
+            "lifecycle_ledger_head_sha256": fresh_audit["storage_boundary"]["lifecycle"][
+                "head_sha256"
+            ],
         },
         "manifest": {
             "filename": MANIFEST_FILENAME,
@@ -174,6 +181,12 @@ def verify_frozen_protected_evaluation(
         "pilot_audit_sha256": _sha256_file(audit_path),
         "labels_sha256": fresh_audit["input"]["labels_sha256"],
         "annotation_review_sha256": fresh_audit["input"]["annotation_review_sha256"],
+        "storage_control_sha256": fresh_audit["storage_boundary"][
+            "storage_control_sha256"
+        ],
+        "lifecycle_ledger_head_sha256": fresh_audit["storage_boundary"]["lifecycle"][
+            "head_sha256"
+        ],
     }
     if source != expected_source:
         raise ValueError("Frozen manifest source bindings no longer match the pilot package")

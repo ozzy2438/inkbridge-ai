@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "status": "pending",
+  "storage_id": "storage-template-not-approved",
+  "pilot_id": "pilot-template-not-approved",
+  "approved_at": "replace_me",
+  "expires_at": "replace_me",
+  "accountable_owner_role": "replace_me",
+  "operator_role": "replace_me",
+  "deletion_verification_owner_role": "replace_me",
+  "platform": "self_hosted_posix",
+  "root_identity_sha256": "replace_me",
+  "operator_uid": -1,
+  "operator_gid": -1,
+  "controls": {
+    "encryption_at_rest_attested": false,
+    "encryption_in_transit_attested": false,
+    "named_least_privilege_attested": false,
+    "audit_logging_attested": false,
+    "backup_copies_in_retention_scope": false,
+    "network_isolation_attested": false,
+    "public_access_allowed": false,
+    "cross_border_disclosure": "none"
+  },
+  "retention": {
+    "raw_source_retention_days": 30,
+    "normalized_candidate_retention_days": 180,
+    "deletion_on_withdrawal_days": 30
+  },
+  "lifecycle_ledger_filename": "protected_lifecycle_events.jsonl"
+}

@@ -108,6 +108,7 @@ automatically on pull requests, so routine CI never downloads model weights or e
 Private student handwriting uses the separate
 [protected self-hosted evaluation contract](protected_evaluation.md). It freezes disjoint
 validation/test writers outside Git, requires a short-lived authorization bound to a sealed local
-safetensors model and exact inference settings, produces a reference-free prediction allowlist,
-refuses hosted CI/external-AI execution, and persists aggregate metrics only. The ordinary hosted
-workflows and `scripts.run_evaluation` command are not approved substitutes for this protected path.
+safetensors model, storage-control/lifecycle hashes, and exact inference settings, produces a
+reference-free prediction allowlist, refuses hosted CI/external-AI execution, and persists aggregate
+metrics only. The ordinary hosted workflows and `scripts.run_evaluation` command are not approved
+substitutes for this protected path.

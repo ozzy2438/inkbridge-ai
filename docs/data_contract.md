@@ -145,8 +145,9 @@ owner-approved and the split-access policy is recorded, the separate
 [protected evaluation contract](protected_evaluation.md) can freeze a read-only, versioned
 validation/test manifest with writer isolation and no training split. Protected inference then
 requires a sealed local safetensors artifact and short-lived authorization bound to the exact
-model, manifest, device, and inference settings. The public dataset manifest examples above do not
-grant permission to process student data.
+model, manifest, storage control, lifecycle-ledger head, device, and inference settings. An open
+consent withdrawal invalidates the protected chain. The public dataset manifest examples above do
+not grant permission to process student data.
 
 ## Hosted workflow boundary
 
@@ -156,4 +157,5 @@ explicit attestation to public, licensed, de-identified line data. Pseudonymous 
 references can still be sensitive; do not upload private pilot or student work as a GitHub
 artifact. Private evaluation requires protected storage and a controlled/self-hosted execution
 path. The repository now provides a fail-closed local contract for that path, but it does not
-provide or certify the private storage, access controls, offline inference host, or real pilot data.
+certify storage encryption, provider IAM/network/audit controls, backup erasure, operator authority,
+or real pilot data.

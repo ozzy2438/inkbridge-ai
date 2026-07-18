@@ -15,6 +15,8 @@ attestation are factually or legally sufficient.
   prompt selection, threshold tuning, or repeated manual model selection.
 - GitHub Actions and other detected CI environments are refused. Model weights must be preloaded;
   inference runs with network access off and no external AI service.
+- Intake, freeze, inference authorization, execution attestation, and aggregate results bind the
+  exact storage-control and lifecycle-ledger-head hashes. Open withdrawals fail closed.
 - Prediction JSONL contains no reference text, writer ID, slice label, or image path. References and
   controlled slices are joined from the protected manifest in memory.
 - The persisted evaluation report contains aggregate and per-controlled-slice metrics, hashes, and
@@ -75,8 +77,9 @@ Copy `configs/evaluation/protected_inference_authorization.template.json` to
 `/protected/inkbridge/pilot-001/protected_inference_authorization.json`. The template is
 deliberately invalid. An authorised owner must set `status` to `approved`, bind the frozen
 evaluation/manifest and exact model hash, approve the device and every inference setting, set
-`model_artifacts_preloaded` to `true`, and give the approval a validity window of at most 30 days.
-Then remove all write permission bits from the authorization file.
+`model_artifacts_preloaded` to `true`, bind the storage-control and lifecycle-ledger-head hashes,
+and give the approval a validity window of at most 30 days. Then remove all write permission bits
+from the authorization file.
 
 Run the producer on the approved self-hosted machine:
 
@@ -117,7 +120,8 @@ drift, changed authorization/model bytes, and provenance that differs from the a
 
 The producer writes `execution_attestation.json`; operators must not hand-edit it. It binds the
 approval reference and authorization hash, canonical inference-configuration hash, exact local
-model artifact, frozen evaluation set/manifest, and prediction-file hash. The repository's
+model artifact, frozen evaluation set/manifest, storage control, lifecycle ledger head, and
+prediction-file hash. The repository's
 `protected_execution_attestation.template.json` is retained only as an intentionally invalid schema
 example.
 
@@ -152,6 +156,7 @@ performance remain protected pilot provenance and require owner review before di
 - A synthetic fake-backend rehearsal proves producer/evaluator control flow, not model quality or
   statistical adequacy.
 - `gold_ready` remains false; this path does not choose the final population or certify coverage.
-- It does not implement storage IAM, encryption, audit-log collection, backup deletion, or consent
-  withdrawal orchestration.
+- It verifies a local owner-only POSIX boundary and deletion-evidence state, but does not
+  independently prove encryption, provider/cloud IAM, host network isolation, immutable audit-log
+  collection, or actual primary/backup erasure.
 - It does not authorise training or production decisions.

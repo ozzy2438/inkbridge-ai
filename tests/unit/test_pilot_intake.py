@@ -5,6 +5,8 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import os
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +14,10 @@ import pytest
 from PIL import Image, PngImagePlugin
 
 from src.data.pilot_intake import validate_protected_pilot, write_pilot_audit
+from src.data.protected_storage import (
+    LIFECYCLE_LEDGER_FILENAME,
+    STORAGE_CONTROL_FILENAME,
+)
 
 LABEL_COLUMNS = [
     "filename",
@@ -132,6 +138,57 @@ def _approved_contract() -> dict[str, Any]:
     }
 
 
+def _add_approved_storage_boundary(
+    dataset: Path, contract: dict[str, Any]
+) -> None:
+    now = datetime.now(timezone.utc)
+    control = {
+        "schema_version": 1,
+        "status": "approved",
+        "storage_id": "storage-shadow-001",
+        "pilot_id": contract["pilot_id"],
+        "approved_at": (now - timedelta(days=1)).isoformat(),
+        "expires_at": (now + timedelta(days=30)).isoformat(),
+        "accountable_owner_role": contract["approval"]["accountable_owner_role"],
+        "operator_role": "ml_evaluation_operator",
+        "deletion_verification_owner_role": contract["storage"][
+            "deletion_verification_owner_role"
+        ],
+        "platform": "self_hosted_posix",
+        "root_identity_sha256": hashlib.sha256(
+            str(dataset.resolve()).encode("utf-8")
+        ).hexdigest(),
+        "operator_uid": os.getuid(),
+        "operator_gid": os.getgid(),
+        "controls": {
+            "encryption_at_rest_attested": True,
+            "encryption_in_transit_attested": True,
+            "named_least_privilege_attested": True,
+            "audit_logging_attested": True,
+            "backup_copies_in_retention_scope": True,
+            "network_isolation_attested": True,
+            "public_access_allowed": False,
+            "cross_border_disclosure": "none",
+        },
+        "retention": {
+            key: contract["storage"][key]
+            for key in (
+                "raw_source_retention_days",
+                "normalized_candidate_retention_days",
+                "deletion_on_withdrawal_days",
+            )
+        },
+        "lifecycle_ledger_filename": LIFECYCLE_LEDGER_FILENAME,
+    }
+    control_path = dataset / STORAGE_CONTROL_FILENAME
+    control_path.write_text(json.dumps(control), encoding="utf-8")
+    ledger_path = dataset / LIFECYCLE_LEDGER_FILENAME
+    ledger_path.write_text("", encoding="utf-8")
+    for path in [dataset, *dataset.rglob("*")]:
+        path.chmod(0o700 if path.is_dir() else 0o600)
+    control_path.chmod(0o400)
+
+
 def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, list[dict[str, str]]]:
     repository = tmp_path / "repository"
     (repository / ".git").mkdir(parents=True)
@@ -179,8 +236,10 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, list[dict[str, str]]]:
             }
         )
     _write_csv(dataset / "annotation_review.csv", REVIEW_COLUMNS, reviews)
+    contract = _approved_contract()
     contract_path = dataset / "pilot_intake.json"
-    contract_path.write_text(json.dumps(_approved_contract()), encoding="utf-8")
+    contract_path.write_text(json.dumps(contract), encoding="utf-8")
+    _add_approved_storage_boundary(dataset, contract)
     return repository, dataset, contract_path, labels
 
 
@@ -290,6 +349,7 @@ def test_protected_pilot_gate_rejects_embedded_image_metadata(tmp_path: Path) ->
     metadata = PngImagePlugin.PngInfo()
     metadata.add_text("Author", "Sensitive scanner metadata")
     Image.new("L", (2, 2), color=255).save(images / new_name, pnginfo=metadata)
+    (images / new_name).chmod(0o600)
     (images / old_name).unlink()
 
     labels_path = dataset / "labels.csv"

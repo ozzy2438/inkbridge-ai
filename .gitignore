@@ -35,6 +35,8 @@ execution_attestation.json
 protected_inference_authorization.json
 protected_prediction_state.json
 predictions.partial.jsonl
+protected_storage_control.json
+protected_lifecycle_events.jsonl
 model_cache/
 checkpoints/
 onnx_models/

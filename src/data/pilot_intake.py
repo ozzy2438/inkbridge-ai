@@ -15,6 +15,8 @@ from typing import Any
 
 from PIL import Image
 
+from src.data.protected_storage import validate_protected_storage_boundary
+
 _SAMPLE_FILENAME = re.compile(r"sample-[0-9a-f]{16,64}\.(?:jpeg|jpg|pgm|png)")
 _WRITER_ID = re.compile(r"writer-[0-9a-f]{16,64}")
 _ANNOTATOR_ID = re.compile(r"annotator-[0-9a-f]{12,64}")
@@ -99,6 +101,17 @@ def validate_protected_pilot(
     _require_outside_repository(contract_file, repo, "Pilot contract")
     contract = _load_json(contract_file)
     _validate_contract(contract)
+    pilot_id = _required_string(contract, "pilot_id", "contract")
+    approval = _required_mapping(contract, "approval", "contract")
+    storage_boundary = validate_protected_storage_boundary(
+        root,
+        pilot_id=pilot_id,
+        contract_storage=_required_mapping(contract, "storage", "contract"),
+        accountable_owner_role=_required_string(
+            approval, "accountable_owner_role", "approval"
+        ),
+        repository_root=repo,
+    )
 
     labels_path = root / "labels.csv"
     images_dir = root / "images"
@@ -126,7 +139,6 @@ def validate_protected_pilot(
         raise ValueError("Protected pilot must contain a non-symlink annotation_review.csv")
     review_metrics = _validate_annotation_review(review_path, labels)
 
-    pilot_id = _required_string(contract, "pilot_id", "contract")
     return {
         "schema_version": 1,
         "status": "gold_candidate_ready",
@@ -159,6 +171,7 @@ def validate_protected_pilot(
             "writers": writer_count,
         },
         "annotation_quality": review_metrics,
+        "storage_boundary": storage_boundary,
         "next_gate": "create_and_freeze_writer_isolated_manifest_after_owner_approval",
     }
 

@@ -54,6 +54,11 @@ The protected self-hosted evaluation gate is implemented, but it has run only on
 data. Its sealed local-model producer has likewise been exercised only with a deterministic fake
 backend; neither contributes a model-quality result to this table.
 
+The protected control plane now also binds an owner-only POSIX storage check and hash-chained
+consent-withdrawal/deletion evidence into intake, freeze, inference authorization, attestation, and
+evaluation. This is no substitute for independently verified provider IAM/encryption/audit logs or
+an authorised real-student run.
+
 ### Ethical Considerations
 - No private student data is included in this public repository
 - A future pilot must pass the protected governance and double-annotation gate; a software pass is

@@ -15,6 +15,7 @@ from src.data.protected_manifest import freeze_protected_evaluation
 from src.evaluation.prediction_producer import PredictionResult
 from src.evaluation.protected_inference import (
     inspect_local_model_artifact,
+    preflight_protected_shadow_pilot,
     produce_protected_prediction_artifact,
 )
 from src.evaluation.protected_runner import run_protected_evaluation
@@ -125,6 +126,10 @@ def _authorization(
         "execution_environment": "approved_self_hosted",
         "evaluation_set_id": metadata["evaluation_set_id"],
         "manifest_sha256": metadata["manifest"]["sha256"],
+        "storage_control_sha256": metadata["source"]["storage_control_sha256"],
+        "lifecycle_ledger_head_sha256": metadata["source"][
+            "lifecycle_ledger_head_sha256"
+        ],
         "model_version": _MODEL_VERSION,
         "model_artifact_sha256": model_artifact["model_artifact_sha256"],
         "device": "cpu",
@@ -296,6 +301,31 @@ def test_protected_inference_is_idempotent_after_completion(
     assert backend is None
 
 
+def test_shadow_pilot_preflight_validates_all_external_bindings_without_inference(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_ci(monkeypatch)
+    repository, dataset, contract, manifest_dir, model, context = _inputs(tmp_path)
+
+    result = preflight_protected_shadow_pilot(
+        contract_path=contract,
+        dataset_dir=dataset,
+        manifest_dir=manifest_dir,
+        authorization_path=context["authorization"],
+        model_dir=model,
+        repository_root=repository,
+    )
+
+    assert result["status"] == "ready_for_owner_authorized_shadow_inference"
+    assert result["checks"] == {
+        "frozen_evaluation": True,
+        "sealed_local_model": True,
+        "inference_authorization": True,
+    }
+    assert result["model_loaded"] is False
+    assert result["inference_run"] is False
+
+
 def test_protected_inference_resumes_after_a_persisted_batch(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -374,6 +404,38 @@ def test_protected_inference_rejects_backend_setting_drift(
     authorization.chmod(0o400)
 
     with pytest.raises(ValueError, match="provenance beam_width does not match"):
+        _run(repository, dataset, contract, manifest_dir, model, context)
+
+
+def test_protected_inference_rejects_storage_binding_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_ci(monkeypatch)
+    repository, dataset, contract, manifest_dir, model, context = _inputs(tmp_path)
+    authorization = context["authorization"]
+    authorization.chmod(0o600)
+    value = json.loads(authorization.read_text(encoding="utf-8"))
+    value["storage_control_sha256"] = "f" * 64
+    authorization.write_text(json.dumps(value), encoding="utf-8")
+    authorization.chmod(0o400)
+
+    with pytest.raises(ValueError, match="storage_control_sha256 does not match"):
+        _run(repository, dataset, contract, manifest_dir, model, context)
+
+
+def test_protected_inference_rejects_operator_role_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_ci(monkeypatch)
+    repository, dataset, contract, manifest_dir, model, context = _inputs(tmp_path)
+    authorization = context["authorization"]
+    authorization.chmod(0o600)
+    value = json.loads(authorization.read_text(encoding="utf-8"))
+    value["operator_role"] = "different_evaluation_operator"
+    authorization.write_text(json.dumps(value), encoding="utf-8")
+    authorization.chmod(0o400)
+
+    with pytest.raises(ValueError, match="operator_role does not match storage control"):
         _run(repository, dataset, contract, manifest_dir, model, context)
 
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,7 @@ from src.data.protected_manifest import (
     freeze_protected_evaluation,
     verify_frozen_protected_evaluation,
 )
+from src.data.protected_storage import append_lifecycle_event
 from src.evaluation.protected_runner import run_protected_evaluation
 from tests.unit.test_pilot_intake import _fixture
 
@@ -98,6 +100,12 @@ def _write_run_inputs(
                 "inference_config_sha256": "c" * 64,
                 "evaluation_set_id": metadata["evaluation_set_id"],
                 "manifest_sha256": metadata["manifest"]["sha256"],
+                "storage_control_sha256": metadata["source"][
+                    "storage_control_sha256"
+                ],
+                "lifecycle_ledger_head_sha256": metadata["source"][
+                    "lifecycle_ledger_head_sha256"
+                ],
                 "predictions_sha256": predictions_sha256,
                 "protected_storage_mounted": True,
                 "network_access_during_inference": False,
@@ -110,6 +118,10 @@ def _write_run_inputs(
         ),
         encoding="utf-8",
     )
+    (dataset / "runs").chmod(0o700)
+    run_dir.chmod(0o700)
+    predictions.chmod(0o600)
+    attestation.chmod(0o600)
     return predictions, attestation
 
 
@@ -191,6 +203,38 @@ def test_verify_detects_manifest_drift(tmp_path: Path) -> None:
     manifest_dir.chmod(0o500)
 
     with pytest.raises(ValueError, match="content drift"):
+        verify_frozen_protected_evaluation(
+            contract,
+            dataset,
+            manifest_dir,
+            repository_root=repository,
+        )
+
+
+def test_open_consent_withdrawal_invalidates_frozen_evaluation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_ci(monkeypatch)
+    repository, dataset, contract, manifest_dir, _ = _freeze(tmp_path)
+    contract_value = json.loads(contract.read_text(encoding="utf-8"))
+    append_lifecycle_event(
+        dataset,
+        pilot_id=contract_value["pilot_id"],
+        event_type="consent_withdrawal_requested",
+        subject_token_sha256=hashlib.sha256(b"keyed-subject-token").hexdigest(),
+        scope_sha256=hashlib.sha256(b"withdrawal-object-scope").hexdigest(),
+        actor_role="pilot_privacy_owner",
+        evidence_reference="withdrawal_request_001",
+        evidence_sha256=hashlib.sha256(b"withdrawal-evidence").hexdigest(),
+        contract_storage=contract_value["storage"],
+        accountable_owner_role=contract_value["approval"][
+            "accountable_owner_role"
+        ],
+        occurred_at=datetime.now(timezone.utc),
+        repository_root=repository,
+    )
+
+    with pytest.raises(ValueError, match="open consent withdrawal"):
         verify_frozen_protected_evaluation(
             contract,
             dataset,

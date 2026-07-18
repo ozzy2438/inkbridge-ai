@@ -10,6 +10,8 @@
   "inference_config_sha256": "replace_me",
   "evaluation_set_id": "replace_me",
   "manifest_sha256": "replace_me",
+  "storage_control_sha256": "replace_me",
+  "lifecycle_ledger_head_sha256": "replace_me",
   "predictions_sha256": "replace_me",
   "protected_storage_mounted": false,
   "network_access_during_inference": false,

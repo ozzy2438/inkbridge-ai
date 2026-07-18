@@ -13,7 +13,8 @@ production deployment. The repository contains a baseline TrOCR inference path,
 heuristic image-quality and layout components, API scaffolding, an offline evaluation
 harness, a resumable pretrained TrOCR prediction producer, and a fail-closed protected-pilot
 governance/double-annotation gate with sealed local-model inference and a writer-isolated,
-aggregate-only self-hosted evaluation path.
+aggregate-only self-hosted evaluation path. The protected path also enforces an owner-only POSIX
+storage boundary and hash-chained consent-withdrawal/primary-and-backup-deletion evidence.
 
 The following claims are intentionally deferred until reproducible artifacts exist:
 
@@ -141,6 +142,7 @@ inkbridge-ai/
 │   │   ├── manifest.py         # Licensed provenance and split manifests
 │   │   ├── datasets.py         # Dataset loaders
 │   │   ├── augmentation.py     # Data augmentation
+│   │   ├── protected_storage.py # Local IAM and lifecycle evidence
 │   │   └── writer_split.py     # Writer-independent splits
 │   ├── labeling/               # Annotation operations
 │   │   └── label_studio_config.py
@@ -161,6 +163,8 @@ inkbridge-ai/
 │   ├── run_evaluation.py
 │   ├── run_baseline_inference.py
 │   ├── run_protected_inference.py
+│   ├── prepare_protected_storage.py
+│   ├── record_protected_lifecycle_event.py
 │   └── export_onnx.py
 ├── docker/                     # Docker configuration
 │   ├── Dockerfile
@@ -206,7 +210,9 @@ child/student data. Its template is intentionally unapproved; no private data or
 included in this repository. After approval, the
 [protected evaluation contract](docs/protected_evaluation.md) freezes validation/test writers and
 uses a sealed, preloaded local TrOCR artifact to produce and evaluate reference-free predictions
-without exporting sample-level content.
+without exporting sample-level content. The
+[protected storage/lifecycle contract](docs/protected_storage_lifecycle.md) binds local IAM facts,
+withdrawal state, and deletion evidence into every downstream artifact.
 
 ## 🔬 Model Architecture
 
@@ -258,6 +264,8 @@ benchmark claims; the next evidence level requires independently verified child/
 - Do not use uploaded data for training without explicit authorization
 - Implement and verify retention, deletion, access control, audit logging, and tenant isolation
   before a pilot
+- Treat local POSIX checks and control-file assertions as engineering evidence, not independent
+  proof of cloud IAM, encryption, firewall policy, WORM logs, or backup erasure
 - Keep student packages outside Git and GitHub-hosted workflows; require two blind gold passes
 - Calibrate abstention before enabling automatic acceptance
 - Do not represent the prototype as GDPR- or production-compliant without a formal assessment
@@ -265,8 +273,8 @@ benchmark claims; the next evidence level requires independently verified child/
 ## 📋 Roadmap
 
 - [ ] Week 1-2: Problem discovery, data governance, locked gold set, baselines
-  **(governance, freeze/sealed-inference/self-hosted eval gates, and smoke baselines complete;
-  real consented gold and infrastructure evidence pending)**
+  **(governance, local-IAM/lifecycle, freeze/sealed-inference/self-hosted eval gates, and smoke
+  baselines complete; real consented gold and independent infrastructure evidence pending)**
 - [ ] Week 3-4: Quality gate, layout segmentation, TrOCR baseline **(prototype implemented; validation pending)**
 - [ ] Week 5-6: Domain fine-tuning, failure analysis, calibration
 - [ ] Week 7: VLM fallback & structured JSON SFT

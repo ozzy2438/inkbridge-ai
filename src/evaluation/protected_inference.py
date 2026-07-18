@@ -46,6 +46,8 @@ _AUTHORIZATION_FIELDS = {
     "execution_environment",
     "evaluation_set_id",
     "manifest_sha256",
+    "storage_control_sha256",
+    "lifecycle_ledger_head_sha256",
     "model_version",
     "model_artifact_sha256",
     "device",
@@ -175,11 +177,36 @@ def produce_protected_prediction_artifact(
     _require_read_only(authorization_file, "Inference authorization")
     authorization_content = authorization_file.read_bytes()
     authorization_sha256 = hashlib.sha256(authorization_content).hexdigest()
-    authorization = _validate_authorization(
+    storage_boundary = _required_mapping(
+        _required_mapping(metadata, "intake_audit_snapshot", "metadata"),
+        "storage_boundary",
+        "metadata.intake_audit_snapshot",
+    )
+    authorization = validate_protected_inference_authorization(
         authorization_content,
         evaluation_set_id=_required_string(metadata, "evaluation_set_id", "metadata"),
         manifest_sha256=_required_string(
             _required_mapping(metadata, "manifest", "metadata"), "sha256", "metadata.manifest"
+        ),
+        storage_control_sha256=_required_string(
+            _required_mapping(metadata, "source", "metadata"),
+            "storage_control_sha256",
+            "metadata.source",
+        ),
+        lifecycle_ledger_head_sha256=_required_string(
+            _required_mapping(metadata, "source", "metadata"),
+            "lifecycle_ledger_head_sha256",
+            "metadata.source",
+        ),
+        accountable_owner_role=_required_string(
+            storage_boundary,
+            "accountable_owner_role",
+            "metadata.intake_audit_snapshot.storage_boundary",
+        ),
+        operator_role=_required_string(
+            storage_boundary,
+            "operator_role",
+            "metadata.intake_audit_snapshot.storage_boundary",
         ),
     )
     model_artifact = inspect_local_model_artifact(
@@ -257,6 +284,10 @@ def produce_protected_prediction_artifact(
                 "authorization_sha256": authorization_sha256,
                 "evaluation_set_id": metadata["evaluation_set_id"],
                 "manifest_sha256": metadata["manifest"]["sha256"],
+                "storage_control_sha256": authorization["storage_control_sha256"],
+                "lifecycle_ledger_head_sha256": authorization[
+                    "lifecycle_ledger_head_sha256"
+                ],
                 "model_artifact_sha256": model_artifact["model_artifact_sha256"],
                 "model_version": authorization["model_version"],
                 "device": authorization["device"],
@@ -342,8 +373,15 @@ def produce_protected_prediction_artifact(
         return _completion_summary(destination, attestation, len(selected))
 
 
-def _validate_authorization(
-    content: bytes, *, evaluation_set_id: str, manifest_sha256: str
+def validate_protected_inference_authorization(
+    content: bytes,
+    *,
+    evaluation_set_id: str,
+    manifest_sha256: str,
+    storage_control_sha256: str,
+    lifecycle_ledger_head_sha256: str,
+    accountable_owner_role: str,
+    operator_role: str,
 ) -> dict[str, Any]:
     try:
         value = json.loads(content)
@@ -359,6 +397,12 @@ def _validate_authorization(
         raise ValueError("Inference authorization evaluation_set_id does not match")
     if value.get("manifest_sha256") != manifest_sha256:
         raise ValueError("Inference authorization manifest_sha256 does not match")
+    if value.get("storage_control_sha256") != storage_control_sha256:
+        raise ValueError("Inference authorization storage_control_sha256 does not match")
+    if value.get("lifecycle_ledger_head_sha256") != lifecycle_ledger_head_sha256:
+        raise ValueError("Inference authorization lifecycle ledger head does not match")
+    _required_sha256(value, "storage_control_sha256", "authorization")
+    _required_sha256(value, "lifecycle_ledger_head_sha256", "authorization")
     _required_sha256(value, "model_artifact_sha256", "authorization")
     _safe_component(_required_string(value, "model_version", "authorization"), "model_version")
     if value.get("device") not in {"cpu", "cuda"}:
@@ -404,6 +448,12 @@ def _validate_authorization(
     _approval_reference(value, "approval_reference")
     _role(value, "accountable_owner_role")
     _role(value, "operator_role")
+    if value.get("accountable_owner_role") != accountable_owner_role:
+        raise ValueError(
+            "Inference authorization accountable_owner_role does not match storage control"
+        )
+    if value.get("operator_role") != operator_role:
+        raise ValueError("Inference authorization operator_role does not match storage control")
     approved_at = _timestamp(value, "approved_at")
     expires_at = _timestamp(value, "expires_at")
     now = datetime.now(timezone.utc)
@@ -416,6 +466,120 @@ def _validate_authorization(
             "Inference authorization validity must be greater than 0 and at most 30 days"
         )
     return value
+
+
+def preflight_protected_shadow_pilot(
+    *,
+    contract_path: str | Path,
+    dataset_dir: str | Path,
+    manifest_dir: str | Path,
+    authorization_path: str | Path,
+    model_dir: str | Path,
+    repository_root: str | Path | None = None,
+) -> dict[str, Any]:
+    """Report aggregate readiness without loading a model or running protected inference."""
+    reject_ci_environment("Protected shadow-pilot preflight")
+    repository = _repository_root(repository_root)
+    checks = {
+        "frozen_evaluation": False,
+        "sealed_local_model": False,
+        "inference_authorization": False,
+    }
+    blockers: list[str] = []
+    metadata: dict[str, Any] | None = None
+    model_artifact: dict[str, Any] | None = None
+    try:
+        metadata, manifest_records = verify_frozen_protected_evaluation(
+            contract_path,
+            dataset_dir,
+            manifest_dir,
+            repository_root=repository,
+        )
+        if not any(record.get("split") == "test" for record in manifest_records):
+            raise ValueError("Frozen evaluation has no test records")
+        checks["frozen_evaluation"] = True
+    except (FileNotFoundError, OSError, RuntimeError, ValueError):
+        blockers.append("frozen_evaluation_gate_failed")
+
+    try:
+        model_artifact = inspect_local_model_artifact(
+            model_dir,
+            repository_root=repository,
+            require_read_only=True,
+        )
+        checks["sealed_local_model"] = True
+    except (FileNotFoundError, OSError, RuntimeError, ValueError):
+        blockers.append("sealed_local_model_gate_failed")
+
+    if metadata is None or model_artifact is None:
+        blockers.append("inference_authorization_not_evaluable")
+    else:
+        try:
+            root = Path(dataset_dir).resolve(strict=True)
+            authorization_file = _required_root_file(
+                authorization_path,
+                root,
+                AUTHORIZATION_FILENAME,
+                "Inference authorization",
+            )
+            _require_read_only(authorization_file, "Inference authorization")
+            storage_boundary = _required_mapping(
+                _required_mapping(metadata, "intake_audit_snapshot", "metadata"),
+                "storage_boundary",
+                "metadata.intake_audit_snapshot",
+            )
+            authorization = validate_protected_inference_authorization(
+                authorization_file.read_bytes(),
+                evaluation_set_id=_required_string(metadata, "evaluation_set_id", "metadata"),
+                manifest_sha256=_required_string(
+                    _required_mapping(metadata, "manifest", "metadata"),
+                    "sha256",
+                    "metadata.manifest",
+                ),
+                storage_control_sha256=_required_string(
+                    _required_mapping(metadata, "source", "metadata"),
+                    "storage_control_sha256",
+                    "metadata.source",
+                ),
+                lifecycle_ledger_head_sha256=_required_string(
+                    _required_mapping(metadata, "source", "metadata"),
+                    "lifecycle_ledger_head_sha256",
+                    "metadata.source",
+                ),
+                accountable_owner_role=_required_string(
+                    storage_boundary,
+                    "accountable_owner_role",
+                    "metadata.intake_audit_snapshot.storage_boundary",
+                ),
+                operator_role=_required_string(
+                    storage_boundary,
+                    "operator_role",
+                    "metadata.intake_audit_snapshot.storage_boundary",
+                ),
+            )
+            if authorization["model_artifact_sha256"] != model_artifact[
+                "model_artifact_sha256"
+            ]:
+                raise ValueError("Authorized model does not match local artifact")
+            checks["inference_authorization"] = True
+        except (FileNotFoundError, OSError, RuntimeError, ValueError):
+            blockers.append("inference_authorization_gate_failed")
+
+    ready = all(checks.values())
+    return {
+        "schema_version": 1,
+        "status": (
+            "ready_for_owner_authorized_shadow_inference"
+            if ready
+            else "blocked_external_evidence_required"
+        ),
+        "ready": ready,
+        "checks": checks,
+        "blockers": sorted(set(blockers)),
+        "protected_gate_evaluated": True,
+        "model_loaded": False,
+        "inference_run": False,
+    }
 
 
 def _validate_backend_provenance(
@@ -573,6 +737,10 @@ def _build_attestation(
         "inference_config_sha256": inference_config_sha256,
         "evaluation_set_id": authorization["evaluation_set_id"],
         "manifest_sha256": authorization["manifest_sha256"],
+        "storage_control_sha256": authorization["storage_control_sha256"],
+        "lifecycle_ledger_head_sha256": authorization[
+            "lifecycle_ledger_head_sha256"
+        ],
         "predictions_sha256": predictions_sha256,
         "protected_storage_mounted": True,
         "network_access_during_inference": False,

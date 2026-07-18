@@ -44,6 +44,8 @@ _ATTESTATION_FIELDS = {
     "inference_config_sha256",
     "evaluation_set_id",
     "manifest_sha256",
+    "storage_control_sha256",
+    "lifecycle_ledger_head_sha256",
     "predictions_sha256",
     "protected_storage_mounted",
     "network_access_during_inference",
@@ -89,12 +91,31 @@ def run_protected_evaluation(
     predictions_sha256 = hashlib.sha256(predictions_content).hexdigest()
     attestation_content = attestation.read_bytes()
     manifest_sha256 = str(_required_mapping(metadata, "manifest", "metadata")["sha256"])
+    source_metadata = _required_mapping(metadata, "source", "metadata")
+    storage_control_sha256 = _required_sha256(
+        source_metadata, "storage_control_sha256", "metadata.source"
+    )
+    lifecycle_ledger_head_sha256 = _required_sha256(
+        source_metadata, "lifecycle_ledger_head_sha256", "metadata.source"
+    )
     evaluation_set_id = _required_string(metadata, "evaluation_set_id", "metadata")
+    storage_boundary = _required_mapping(
+        _required_mapping(metadata, "intake_audit_snapshot", "metadata"),
+        "storage_boundary",
+        "metadata.intake_audit_snapshot",
+    )
     attestation_value = _validate_attestation(
         model_version=model_version,
         evaluation_set_id=evaluation_set_id,
         manifest_sha256=manifest_sha256,
+        storage_control_sha256=storage_control_sha256,
+        lifecycle_ledger_head_sha256=lifecycle_ledger_head_sha256,
         predictions_sha256=predictions_sha256,
+        operator_role=_required_string(
+            storage_boundary,
+            "operator_role",
+            "metadata.intake_audit_snapshot.storage_boundary",
+        ),
         content=attestation_content,
     )
 
@@ -136,6 +157,10 @@ def run_protected_evaluation(
         ],
         "model_artifact_sha256": attestation_value["model_artifact_sha256"],
         "inference_config_sha256": attestation_value["inference_config_sha256"],
+        "storage_control_sha256": attestation_value["storage_control_sha256"],
+        "lifecycle_ledger_head_sha256": attestation_value[
+            "lifecycle_ledger_head_sha256"
+        ],
         "aggregate_only": True,
         "sample_level_output_persisted": False,
         "references_exported": False,
@@ -151,7 +176,13 @@ def run_protected_evaluation(
             baseline_results, root, "Baseline evaluation result"
         )
         baseline = load_evaluation_artifact(baseline_path)
-        _validate_protected_baseline(baseline, evaluation_set_id, manifest_sha256)
+        _validate_protected_baseline(
+            baseline,
+            evaluation_set_id,
+            manifest_sha256,
+            storage_control_sha256,
+            lifecycle_ledger_head_sha256,
+        )
         thresholds = evaluation_config.get("release_gate")
         if not isinstance(thresholds, dict):
             raise ValueError("Evaluation config must contain a 'release_gate' mapping")
@@ -162,6 +193,20 @@ def run_protected_evaluation(
         artifact["release_gate"] = evaluate_release_gate(artifact, baseline, thresholds)
 
     destination = _required_results_directory(output_dir, root)
+    current_metadata, _ = verify_frozen_protected_evaluation(
+        contract_path,
+        dataset_dir,
+        manifest_dir,
+        repository_root=repository_root,
+    )
+    if current_metadata != metadata:
+        raise ValueError("Protected evaluation bindings changed while evaluation was running")
+    if hashlib.sha256(predictions.read_bytes()).hexdigest() != predictions_sha256:
+        raise ValueError("Protected predictions changed while evaluation was running")
+    if hashlib.sha256(attestation.read_bytes()).digest() != hashlib.sha256(
+        attestation_content
+    ).digest():
+        raise ValueError("Execution attestation changed while evaluation was running")
     destination.mkdir(mode=0o700, exist_ok=True)
     result_path = destination / f"eval_{safe_model_version}_{evaluation_set_id}.json"
     if result_path.exists() or result_path.is_symlink():
@@ -233,7 +278,10 @@ def _validate_attestation(
     model_version: str,
     evaluation_set_id: str,
     manifest_sha256: str,
+    storage_control_sha256: str,
+    lifecycle_ledger_head_sha256: str,
     predictions_sha256: str,
+    operator_role: str,
     content: bytes,
 ) -> dict[str, Any]:
     value = _load_object_bytes(content, "Execution attestation")
@@ -249,19 +297,27 @@ def _validate_attestation(
         raise ValueError("Execution attestation evaluation_set_id does not match")
     if value.get("manifest_sha256") != manifest_sha256:
         raise ValueError("Execution attestation manifest_sha256 does not match")
+    if value.get("storage_control_sha256") != storage_control_sha256:
+        raise ValueError("Execution attestation storage_control_sha256 does not match")
+    if value.get("lifecycle_ledger_head_sha256") != lifecycle_ledger_head_sha256:
+        raise ValueError("Execution attestation lifecycle ledger head does not match")
     if value.get("predictions_sha256") != predictions_sha256:
         raise ValueError("Execution attestation predictions_sha256 does not match")
     _approval_reference(value, "approval_reference")
     _required_sha256(value, "inference_authorization_sha256", "attestation")
     _required_sha256(value, "model_artifact_sha256", "attestation")
     _required_sha256(value, "inference_config_sha256", "attestation")
+    _required_sha256(value, "storage_control_sha256", "attestation")
+    _required_sha256(value, "lifecycle_ledger_head_sha256", "attestation")
     _verified_timestamp(value, "executed_at")
-    operator_role = _required_string(value, "operator_role", "attestation")
+    actual_operator_role = _required_string(value, "operator_role", "attestation")
     if (
-        re.fullmatch(r"[a-z][a-z0-9_]{7,63}", operator_role) is None
-        or operator_role in {"pending", "replace_me"}
+        re.fullmatch(r"[a-z][a-z0-9_]{7,63}", actual_operator_role) is None
+        or actual_operator_role in {"pending", "replace_me"}
     ):
         raise ValueError("Execution attestation operator_role must be an approved role")
+    if actual_operator_role != operator_role:
+        raise ValueError("Execution attestation operator_role does not match storage control")
     expected_booleans = {
         "protected_storage_mounted": True,
         "network_access_during_inference": False,
@@ -278,13 +334,19 @@ def _validate_attestation(
 
 
 def _validate_protected_baseline(
-    baseline: Mapping[str, Any], evaluation_set_id: str, manifest_sha256: str
+    baseline: Mapping[str, Any],
+    evaluation_set_id: str,
+    manifest_sha256: str,
+    storage_control_sha256: str,
+    lifecycle_ledger_head_sha256: str,
 ) -> None:
     protected = _required_mapping(baseline, "protected_evaluation", "baseline")
     required = {
         "execution_mode": "approved_self_hosted_offline",
         "evaluation_set_id": evaluation_set_id,
         "manifest_sha256": manifest_sha256,
+        "storage_control_sha256": storage_control_sha256,
+        "lifecycle_ledger_head_sha256": lifecycle_ledger_head_sha256,
         "aggregate_only": True,
         "sample_level_output_persisted": False,
         "references_exported": False,
