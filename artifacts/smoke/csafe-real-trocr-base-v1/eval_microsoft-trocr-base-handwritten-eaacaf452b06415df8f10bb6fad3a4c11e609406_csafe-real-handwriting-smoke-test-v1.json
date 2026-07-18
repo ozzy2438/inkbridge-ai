@@ -1,0 +1,163 @@
+{
+  "config": {
+    "filename": "evaluation_config.yaml",
+    "sha256": "e1e8e4dedf2d0b93bcd1e08ea629310147cb313b184efa469339ac10eefaf82d"
+  },
+  "generated_at": "2026-07-17T11:51:01.740731+00:00",
+  "input": {
+    "evaluation_set_sha256": "3fc02a64ebdd9b1e2bb903f29d992104f2a55f200f5032f08a336cf9f3b8ff6d",
+    "filename": "predictions.jsonl",
+    "num_records": 5,
+    "sha256": "eb905434cf4c0512408e6ff832376999e5da137e60666bf53e8ec4d597e4e904"
+  },
+  "metrics": {
+    "abstention_metrics": {
+      "abstention_rate": 0.0,
+      "correct_abstentions": 0.0,
+      "unnecessary_abstentions": 0.0
+    },
+    "calibration_error": 0.7086351275444032,
+    "cer": 0.058394160583941604,
+    "false_confidence_rate": 0.5,
+    "mean_confidence": 0.9086351275444031,
+    "normalized_edit_distance": 0.06540082863612276,
+    "num_samples": 5,
+    "p50_latency_ms": 1329.9255415004154,
+    "p95_latency_ms": 1763.3348082999873,
+    "samples_per_minute": 44.74344528169307,
+    "valid_output_rate": 1.0,
+    "wer": 0.32142857142857145
+  },
+  "model_version": "microsoft-trocr-base-handwritten-eaacaf452b06415df8f10bb6fad3a4c11e609406",
+  "schema_version": 1,
+  "slices": {
+    "adult": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.7086351275444032,
+      "cer": 0.058394160583941604,
+      "false_confidence_rate": 0.5,
+      "mean_confidence": 0.9086351275444031,
+      "normalized_edit_distance": 0.06540082863612276,
+      "num_samples": 5,
+      "wer": 0.32142857142857145
+    },
+    "csafe": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.7086351275444032,
+      "cer": 0.058394160583941604,
+      "false_confidence_rate": 0.5,
+      "mean_confidence": 0.9086351275444031,
+      "normalized_edit_distance": 0.06540082863612276,
+      "num_samples": 5,
+      "wer": 0.32142857142857145
+    },
+    "page_lines_2": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.8354581892490387,
+      "cer": 0.08695652173913043,
+      "false_confidence_rate": 0.0,
+      "mean_confidence": 0.8354581892490387,
+      "normalized_edit_distance": 0.08585055643879173,
+      "num_samples": 2,
+      "wer": 0.35714285714285715
+    },
+    "page_lines_3": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.6240864197413126,
+      "cer": 0.029411764705882353,
+      "false_confidence_rate": 0.5,
+      "mean_confidence": 0.957419753074646,
+      "normalized_edit_distance": 0.05176767676767677,
+      "num_samples": 3,
+      "wer": 0.2857142857142857
+    },
+    "prompt_phr": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.7086351275444032,
+      "cer": 0.058394160583941604,
+      "false_confidence_rate": 0.5,
+      "mean_confidence": 0.9086351275444031,
+      "normalized_edit_distance": 0.06540082863612276,
+      "num_samples": 5,
+      "wer": 0.32142857142857145
+    },
+    "real_handwriting": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.7086351275444032,
+      "cer": 0.058394160583941604,
+      "false_confidence_rate": 0.5,
+      "mean_confidence": 0.9086351275444031,
+      "normalized_edit_distance": 0.06540082863612276,
+      "num_samples": 5,
+      "wer": 0.32142857142857145
+    },
+    "reference_prompt_derived": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.7086351275444032,
+      "cer": 0.058394160583941604,
+      "false_confidence_rate": 0.5,
+      "mean_confidence": 0.9086351275444031,
+      "normalized_edit_distance": 0.06540082863612276,
+      "num_samples": 5,
+      "wer": 0.32142857142857145
+    },
+    "repetition_1": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.7086351275444032,
+      "cer": 0.058394160583941604,
+      "false_confidence_rate": 0.5,
+      "mean_confidence": 0.9086351275444031,
+      "normalized_edit_distance": 0.06540082863612276,
+      "num_samples": 5,
+      "wer": 0.32142857142857145
+    },
+    "session_1": {
+      "abstention_metrics": {
+        "abstention_rate": 0.0,
+        "correct_abstentions": 0.0,
+        "unnecessary_abstentions": 0.0
+      },
+      "calibration_error": 0.7086351275444032,
+      "cer": 0.058394160583941604,
+      "false_confidence_rate": 0.5,
+      "mean_confidence": 0.9086351275444031,
+      "normalized_edit_distance": 0.06540082863612276,
+      "num_samples": 5,
+      "wer": 0.32142857142857145
+    }
+  },
+  "status": "evaluated",
+  "test_set": "csafe-real-handwriting-smoke-test-v1"
+}

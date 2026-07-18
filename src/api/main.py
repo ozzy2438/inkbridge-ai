@@ -9,8 +9,8 @@ Production-grade API for handwriting intelligence with:
 """
 
 import time
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 import structlog
 from fastapi import FastAPI, Request
@@ -18,32 +18,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_client import Counter, Histogram, make_asgi_app
 
-from src.api.routes import health, inference, jobs, review, exports
 from src.api.middleware.logging import LoggingMiddleware
+from src.api.routes import exports, health, inference, jobs, review
 from src.models.model_registry import ModelRegistry
 
 logger = structlog.get_logger()
 
 # Prometheus metrics
 REQUEST_COUNT = Counter(
-    "inkbridge_requests_total",
-    "Total API requests",
-    ["method", "endpoint", "status"]
+    "inkbridge_requests_total", "Total API requests", ["method", "endpoint", "status"]
 )
 REQUEST_LATENCY = Histogram(
-    "inkbridge_request_latency_seconds",
-    "Request latency in seconds",
-    ["method", "endpoint"]
+    "inkbridge_request_latency_seconds", "Request latency in seconds", ["method", "endpoint"]
 )
 INFERENCE_LATENCY = Histogram(
-    "inkbridge_inference_latency_seconds",
-    "Model inference latency",
-    ["model_version", "page_type"]
+    "inkbridge_inference_latency_seconds", "Model inference latency", ["model_version", "page_type"]
 )
 PAGES_PROCESSED = Counter(
-    "inkbridge_pages_processed_total",
-    "Total pages processed",
-    ["model", "route"]
+    "inkbridge_pages_processed_total", "Total pages processed", ["model", "route"]
 )
 
 
@@ -51,14 +43,14 @@ PAGES_PROCESSED = Counter(
 async def lifespan(app: FastAPI) -> AsyncGenerator:
     """Application lifespan handler — load models at startup."""
     logger.info("inkbridge.startup", msg="Loading model registry...")
-    
+
     # Initialize model registry
     app.state.model_registry = ModelRegistry()
     await app.state.model_registry.load_champion_model()
-    
+
     logger.info("inkbridge.startup.complete", msg="Models loaded successfully")
     yield
-    
+
     # Cleanup
     logger.info("inkbridge.shutdown", msg="Shutting down InkBridge AI")
     await app.state.model_registry.unload_models()
@@ -96,18 +88,13 @@ async def track_metrics(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
     duration = time.time() - start_time
-    
+
     REQUEST_COUNT.labels(
-        method=request.method,
-        endpoint=request.url.path,
-        status=response.status_code
+        method=request.method, endpoint=request.url.path, status=response.status_code
     ).inc()
-    
-    REQUEST_LATENCY.labels(
-        method=request.method,
-        endpoint=request.url.path
-    ).observe(duration)
-    
+
+    REQUEST_LATENCY.labels(method=request.method, endpoint=request.url.path).observe(duration)
+
     return response
 
 

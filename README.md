@@ -1,13 +1,35 @@
-# InkBridge AI — Production Handwriting Intelligence & ModelOps Platform
+# InkBridge AI — Handwriting Intelligence & ModelOps Prototype
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-green.svg)](https://github.com/features/actions)
+[![CI](https://github.com/ozzy2438/inkbridge-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/ozzy2438/inkbridge-ai/actions/workflows/ci.yml)
 
-> Converts photographed, scanned, or PDF student handwriting into layout-preserved, confidence-scored, auditable digital transcripts — with human-in-the-loop review for enterprise reliability.
+> An evidence-first prototype for converting photographed and scanned handwriting into layout-aware, confidence-scored transcripts with human review.
 
-![Architecture Overview](docs/assets/architecture_overview.png)
+## Project status
+
+InkBridge AI is currently an **alpha research and engineering prototype**, not a
+production deployment. The repository contains a baseline TrOCR inference path,
+heuristic image-quality and layout components, API scaffolding, an offline evaluation
+harness, a resumable pretrained TrOCR prediction producer, and a fail-closed protected-pilot
+governance/double-annotation gate with sealed local-model inference and a writer-isolated,
+aggregate-only self-hosted evaluation path. The protected path also enforces an owner-only POSIX
+storage boundary and hash-chained consent-withdrawal/primary-and-backup-deletion evidence. A
+separate fail-closed adapter now prepares a small, local-only SMHD student-handwriting research
+rehearsal without treating it as protected-pilot or gold-set evidence. A sealed-model, socket-
+blocked local producer has now captured the first aggregate-only TrOCR result on that rehearsal.
+
+The following claims are intentionally deferred until reproducible artifacts exist:
+
+- domain fine-tuning improvements
+- calibrated auto-accept or abstention thresholds
+- latency, throughput, and cost targets
+- asynchronous class-set processing
+- production privacy, retention, audit, and tenant-isolation controls
+- reviewer-time reduction and pilot outcomes
+
+Measured results will be published only with the dataset manifest, split report,
+configuration, model version, and evaluation artifact needed to reproduce them.
 
 ## 🎯 Problem Statement
 
@@ -18,9 +40,11 @@ Education and assessment organizations receive handwritten student work as photo
 - Mixed printed questions and student handwriting
 - Multiple handwriting styles and difficulty levels
 
-**InkBridge AI** solves the real business problem: reducing the human time needed to digitize and verify a class set from ~45 minutes to ~15 minutes.
+**InkBridge AI** targets the real business problem: reducing the human time needed
+to digitize and verify a class set. The initial 45-to-15-minute objective is a pilot
+hypothesis and has not yet been validated.
 
-## 🏗️ Architecture
+## 🏗️ Target architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -61,7 +85,10 @@ Education and assessment organizations receive handwritten student work as photo
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 Quick Start
+The diagram describes the target system. The current repository does not yet include
+durable job storage, a working review queue, or the complete active-learning loop.
+
+## 🚀 Development setup
 
 ```bash
 # Clone the repository
@@ -75,15 +102,18 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 # Install dependencies
 pip install -e ".[dev]"
 
-# Download model weights
+# Download public baseline model weights
 python scripts/download_models.py
 
 # Run the API server
 uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 
-# Run with Docker
-docker-compose up --build
+# Run the development stack
+docker compose -f docker/docker-compose.yml up --build
 ```
+
+The single-image endpoint is the current integration focus. PDF conversion and the
+batch workflow are not yet end-to-end complete.
 
 ## 📁 Project Structure
 
@@ -93,7 +123,7 @@ inkbridge-ai/
 │   ├── api/                    # FastAPI application
 │   │   ├── main.py             # Application entry point
 │   │   ├── routes/             # API route handlers
-│   │   ├── middleware/         # Auth, logging, rate limiting
+│   │   ├── middleware/         # Request logging (auth/rate limiting planned)
 │   │   └── schemas/            # Pydantic models
 │   ├── pipeline/               # Core ML pipeline
 │   │   ├── quality_gate.py     # Image quality assessment
@@ -101,45 +131,43 @@ inkbridge-ai/
 │   │   ├── confidence_router.py # Route to appropriate model
 │   │   ├── ocr_engine.py       # TrOCR inference
 │   │   └── vlm_fallback.py     # VLM for hard pages
-│   ├── models/                 # Model definitions
-│   │   ├── trocr_finetuned.py  # Fine-tuned TrOCR
-│   │   ├── vlm_structured.py   # VLM structured output
-│   │   └── model_registry.py   # Version management
+│   ├── models/                 # Model metadata
+│   │   └── model_registry.py   # Prototype version management
 │   ├── training/               # Training pipelines
 │   │   ├── finetune_trocr.py   # TrOCR fine-tuning
-│   │   ├── sft_vlm.py          # VLM supervised fine-tuning
-│   │   ├── dpo_alignment.py    # DPO preference training
 │   │   └── active_learning.py  # Active learning loop
 │   ├── evaluation/             # Evaluation framework
 │   │   ├── metrics.py          # CER, WER, calibration
-│   │   ├── failure_atlas.py    # Failure categorization
-│   │   ├── regression_tests.py # Model release gate
-│   │   └── benchmarks.py       # Latency/cost benchmarks
+│   │   ├── runner.py           # Artifact validation and release gates
+│   │   ├── protected_inference.py # Sealed-model protected producer
+│   │   └── failure_atlas.py    # Failure categorization
 │   ├── data/                   # Data processing
+│   │   ├── manifest.py         # Licensed provenance and split manifests
 │   │   ├── datasets.py         # Dataset loaders
-│   │   ├── preprocessing.py    # Image preprocessing
 │   │   ├── augmentation.py     # Data augmentation
+│   │   ├── protected_storage.py # Local IAM and lifecycle evidence
 │   │   └── writer_split.py     # Writer-independent splits
 │   ├── labeling/               # Annotation operations
-│   │   ├── label_studio_config.py
-│   │   ├── annotation_guidelines.py
-│   │   └── quality_metrics.py
+│   │   └── label_studio_config.py
 │   └── export/                 # Output formatting
-│       ├── transcript.py       # Text/JSON/DOCX export
-│       └── lms_integration.py  # LMS API export
+│       └── transcript.py       # Prototype JSON/TXT/DOCX/LMS formatting
 ├── configs/                    # Configuration files
 │   ├── model_config.yaml
 │   ├── training_config.yaml
-│   ├── evaluation_config.yaml
-│   └── deployment_config.yaml
+│   └── evaluation_config.yaml
 ├── tests/                      # Test suite
 │   ├── unit/
-│   ├── integration/
-│   └── regression/
+│   ├── integration/            # API lifecycle coverage
+│   └── regression/             # Evaluation release-gate coverage
 ├── scripts/                    # Utility scripts
 │   ├── download_models.py
+│   ├── build_dataset_manifest.py
 │   ├── prepare_datasets.py
 │   ├── run_evaluation.py
+│   ├── run_baseline_inference.py
+│   ├── run_protected_inference.py
+│   ├── prepare_protected_storage.py
+│   ├── record_protected_lifecycle_event.py
 │   └── export_onnx.py
 ├── docker/                     # Docker configuration
 │   ├── Dockerfile
@@ -149,23 +177,18 @@ inkbridge-ai/
 │   ├── terraform/
 │   └── kubernetes/
 ├── notebooks/                  # Research notebooks
-│   ├── 01_baseline_evaluation.ipynb
-│   ├── 02_fine_tuning_trocr.ipynb
-│   ├── 03_vlm_structured_output.ipynb
-│   ├── 04_confidence_calibration.ipynb
-│   └── 05_quantization_benchmark.ipynb
+│   └── 01_baseline_evaluation.ipynb
 ├── docs/                       # Documentation
-│   ├── model_card.md
-│   ├── evaluation_report.md
 │   ├── annotation_guidelines.md
-│   ├── api_documentation.md
-│   └── deployment_guide.md
+│   ├── data_contract.md
+│   ├── evaluation.md
+│   └── model_card.md
 ├── pyproject.toml
 ├── Makefile
 └── .github/workflows/          # CI/CD
     ├── ci.yml
-    ├── model_evaluation.yml
-    └── deploy.yml
+    ├── baseline_predictions.yml
+    └── model_evaluation.yml
 ```
 
 ## 📊 Datasets
@@ -173,56 +196,105 @@ inkbridge-ai/
 | Dataset | Purpose | Size | License |
 |---------|---------|------|---------|
 | [IAM Handwriting Database](https://fki.tic.heia-fr.ch/databases/iam-handwriting-database) | Standard benchmark & baseline | 13,353 lines, 657 writers | Research |
-| [SMHD](https://github.com/hiqmatNisa/SMHD) | Student essays, cross-outs, corrections | 500+ students, essays & math | CC BY-NC |
-| [GNHK](https://www.goodnotes.com/gnhk) | Camera-captured, varied conditions | 687 images, 9,363 lines | Research |
+| [SMHD line version](https://doi.org/10.25439/rmt.24419986.v1) | Local-only student-handwriting research rehearsal | Pinned 12-writer, 36-line subset | CC BY-NC 4.0 |
+| [GNHK](https://github.com/GoodNotes/GNHK-dataset) | Camera-captured, varied conditions | 687 images, 9,363 lines | CC BY 4.0 |
+| [OpenHand-Synth](https://huggingface.co/datasets/to-be/OpenHand-Synth) | Synthetic pipeline smoke test only | Pinned 27-line subset | CC BY 4.0 |
+| [CSAFE Handwriting Database](https://doi.org/10.25380/iastate.10062203.v2) | Real adult-handwriting pipeline smoke test only | Pinned 9-writer, 19-line subset | CC BY 4.0 |
 | Synthetic Augmented | Blur, shadow, glare, rotation | Generated on-the-fly | N/A |
 | Consented Pilot Set | Production-like evaluation | TBD (pilot phase) | Private |
 
+See the [dataset contract](docs/data_contract.md) for normalized labels, provenance fields,
+source hashing, the reproducible public smoke subsets, and deterministic writer-independent split
+generation. The local SMHD subset reaches real student handwriting but remains non-commercial,
+unreviewed research preparation; synthetic, adult-handwriting, and SMHD preparation evidence are
+not student-handwriting gold benchmarks.
+
+The [protected student-pilot gate](docs/pilot_governance.md) defines the separate path for consented
+child/student data. Its template is intentionally unapproved; no private data or consent record is
+included in this repository. After approval, the
+[protected evaluation contract](docs/protected_evaluation.md) freezes validation/test writers and
+uses a sealed, preloaded local TrOCR artifact to produce and evaluate reference-free predictions
+without exporting sample-level content. The
+[protected storage/lifecycle contract](docs/protected_storage_lifecycle.md) binds local IAM facts,
+withdrawal state, and deletion evidence into every downstream artifact.
+
 ## 🔬 Model Architecture
 
-### Primary: Fine-tuned TrOCR
+### Current baseline: pretrained TrOCR
 - Base: `microsoft/trocr-base-handwritten`
-- Fine-tuned on SMHD + GNHK + augmented data
-- Writer-independent train/test split
-- Confidence scoring via token-level log probabilities
+- Domain fine-tuning is planned; no fine-tuned checkpoint is published yet
+- Normalized datasets can produce hashed, licensed manifests with deterministic writer-isolated splits
+- Line-level manifests can produce resumable prediction artifacts pinned to an immutable model revision
+- Confidence calibration and threshold selection remain evaluation work
 
-### Fallback: Compact VLM
+### Prototype fallback: compact VLM
 - Structured JSON output with bounding boxes
 - Handles full-page layout understanding
-- Routes only for hard pages (saves cost)
+- Routing and output-schema fidelity have not yet been benchmarked
 
-### Optimization Pipeline
-- FP16 → INT8 → ONNX Runtime
-- Dynamic batching for throughput
-- Distillation experiments
+### Planned optimization pipeline
+- FP16 → INT8 → ONNX Runtime comparison
+- Dynamic batching benchmark
+- Distillation experiments gated on measured quality, latency, and cost
 
-## 📈 Evaluation Metrics
+## 📈 Evaluation contract
+
+The offline evaluator validates prediction JSONL artifacts, hashes its inputs, and computes the
+implemented metrics below. A separate producer can now capture pretrained TrOCR predictions from a
+licensed line-level manifest. The repository still has no independently verified child/student gold
+benchmark because no authorised protected pilot has been run. See the
+[evaluation contract](docs/evaluation.md) for the public input schema and release-gate workflow,
+and the [protected evaluation contract](docs/protected_evaluation.md) for private shadow
+evaluation.
+
+The repository contains a
+[captured synthetic TrOCR smoke result](artifacts/smoke/openhand-synth-trocr-base-v1/README.md)
+and a [captured real adult-handwriting smoke result](artifacts/smoke/csafe-real-trocr-base-v1/README.md)
+that prove the pipeline runs end to end. Both are deliberately excluded from student-handwriting
+benchmark claims. The
+[SMHD offline research result](artifacts/research/smhd-trocr-base-v1/README.md) adds the first real
+student-handwriting model run: six unreviewed, writer-isolated lines processed from a sealed local
+model with no network access. Its CER is 0.1300 and WER is 0.3611, but it is non-commercial research
+evidence—not a gold benchmark or protected pilot. A private 15-line validation-plus-test failure
+atlas is also complete. Its calibration gate found no threshold meeting 50% validation coverage at
+CER <= 0.10, so automatic acceptance remains disabled. A blind double-review queue now covers all
+nine validation lines while preserving the six-line test holdout. The next gold evidence level
+still requires humans to execute that review on independently verified, authorised data.
 
 | Category | Metrics |
 |----------|--------|
 | Text Recognition | CER, WER, Normalized Edit Distance |
-| Layout | Region F1, Reading Order Accuracy |
+| Layout | Region F1, Reading Order Accuracy **(planned)** |
 | Reliability | Calibration Error, False-Confidence Rate |
-| Operations | Correction Minutes/Page, Auto-Accept Rate |
-| Production | p50/p95 Latency, Pages/Min, Cost/Page |
+| Operations | Correction Minutes/Page, Auto-Accept Rate **(planned)** |
+| Production | p50/p95 Sample Latency; Page Throughput and Cost/Page **(planned)** |
 | Edge Cases | Blur, Cursive, Cross-outs, Insertions |
 
-## 🛡️ Privacy & Safety
+## 🛡️ Privacy and safety requirements
 
-- No student names logged
-- Uploaded documents auto-deleted after processing
-- Demo uses only licensed/synthetic examples
-- Model abstains when uncertain (no silent hallucination)
-- Audit trail for all predictions
-- GDPR/privacy-by-design compliant
+- Use only licensed, synthetic, or explicitly consented and de-identified examples
+- Do not use uploaded data for training without explicit authorization
+- Implement and verify retention, deletion, access control, audit logging, and tenant isolation
+  before a pilot
+- Treat local POSIX checks and control-file assertions as engineering evidence, not independent
+  proof of cloud IAM, encryption, firewall policy, WORM logs, or backup erasure
+- Keep student packages outside Git and GitHub-hosted workflows; require two blind gold passes
+- Calibrate abstention before enabling automatic acceptance
+- Do not represent the prototype as GDPR- or production-compliant without a formal assessment
 
 ## 📋 Roadmap
 
-- [x] Week 1-2: Problem discovery, data governance, baselines
-- [x] Week 3-4: Quality gate, layout segmentation, TrOCR baseline
-- [ ] Week 5-6: Domain fine-tuning, failure analysis, calibration
+- [ ] Week 1-2: Problem discovery, data governance, locked gold set, baselines
+  **(governance, local-IAM/lifecycle, freeze/sealed-inference/self-hosted eval gates, and smoke
+  baselines plus an offline SMHD research baseline complete; real consented gold and independent
+  infrastructure evidence pending)**
+- [ ] Week 3-4: Quality gate, layout segmentation, TrOCR baseline **(prototype implemented; validation pending)**
+- [ ] Week 5-6: Domain fine-tuning, failure analysis, calibration **(private SMHD failure atlas and
+  fail-closed calibration eligibility gate complete; fine-tuning and statistically adequate,
+  independently reviewed calibration data pending)**
 - [ ] Week 7: VLM fallback & structured JSON SFT
-- [ ] Week 8: Label Studio, annotation workflow, active learning
+- [ ] Week 8: Label Studio, annotation workflow, active learning **(privacy-safe priority queue and
+  double-blind assignment contract complete; human annotation execution pending)**
 - [ ] Week 9: Quantization, distillation, latency benchmarks
 - [ ] Week 10: API, async batch pipeline, monitoring, CI/CD
 - [ ] Week 11: Shadow pilot, reviewer-time measurement
@@ -231,6 +303,9 @@ inkbridge-ai/
 ## 🤝 Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+For a concise, evidence-backed application/interview view, see the
+[portfolio summary](docs/portfolio_summary.md).
 
 ## 📄 License
 

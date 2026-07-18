@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "status": "captured",
+  "generated_at": "2026-07-18T05:13:42.769383+00:00",
+  "evidence_scope": "noncommercial_research_rehearsal_only",
+  "dataset": {
+    "name": "smhd-research-rehearsal",
+    "version": "figshare-24419986-v1-selection-v1",
+    "license_id": "CC-BY-NC-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "split": "test",
+    "num_samples": 6,
+    "num_writers": 2,
+    "publisher_hash_marker_samples": 3,
+    "publisher_no_hash_marker_samples": 3,
+    "manifest_sha256": "7dfae6bbfb1f5b3c6170c2d18a076ab672d6bc684a2b85a514e48defb4705824",
+    "manifest_metadata_sha256": "95f1dc5d28c9f192f51ea9610d48044a9d7d64cc4c3fe9c244670ecbc53f2d73",
+    "evaluation_set_sha256": "d578516a115e29e4467168d2dbe7a51254253242f8ef52e3159b9a0cb287d098",
+    "reference_status": "publisher_transcription_unreviewed"
+  },
+  "model": {
+    "model_version": "microsoft-trocr-base-handwritten-eaacaf452b06415df8f10bb6fad3a4c11e609406-smhd-research-v1",
+    "model_artifact_sha256": "8215ca7b0e4536affbc01a5718abae5d572cf011b0e709953e57eb0a1be92149",
+    "num_files": 8,
+    "total_bytes": 1334746073,
+    "read_only": true,
+    "device": "cpu",
+    "dtype": "float32",
+    "batch_size": 2,
+    "beam_width": 4,
+    "max_length": 128,
+    "confidence_threshold": 0.7,
+    "abstention_threshold": 0.4,
+    "processor_use_fast": false,
+    "runtime": {
+      "machine": "arm64",
+      "os": "Darwin",
+      "os_release": "27.0.0",
+      "python": "3.14.4",
+      "torch": "2.13.0",
+      "transformers": "4.57.6"
+    }
+  },
+  "execution": {
+    "local_files_only": true,
+    "network_access_allowed": false,
+    "python_socket_guard_enabled": true,
+    "external_ai_service": false,
+    "github_actions_allowed": false,
+    "predictions_sha256": "196250d38141dbaf43cf2171806c0f23eacf7e0e7419caf524d0f495ddf9a472",
+    "sample_level_artifacts_committed": false,
+    "uncertain_predictions": 1,
+    "unreadable_predictions": 0
+  },
+  "evaluation": {
+    "config_sha256": "e1e8e4dedf2d0b93bcd1e08ea629310147cb313b184efa469339ac10eefaf82d",
+    "metrics": {
+      "cer": 0.13,
+      "wer": 0.3611111111111111,
+      "normalized_edit_distance": 0.13452809892438375,
+      "mean_confidence": 0.8573377331097921,
+      "calibration_error": 0.857337733109792,
+      "false_confidence_rate": 1.0,
+      "abstention_rate": 0.0,
+      "valid_output_rate": 1.0,
+      "p50_latency_ms": 1719.111521000741,
+      "p95_latency_ms": 1862.074416501855,
+      "samples_per_minute": 35.310276567745035
+    },
+    "slices": {
+      "publisher_hash_marker": {
+        "num_samples": 3,
+        "cer": 0.18181818181818182,
+        "wer": 0.3888888888888889,
+        "normalized_edit_distance": 0.18595629121944912,
+        "mean_confidence": 0.8138683040936788,
+        "false_confidence_rate": 0.0
+      },
+      "publisher_no_hash_marker": {
+        "num_samples": 3,
+        "cer": 0.08928571428571429,
+        "wer": 0.3333333333333333,
+        "normalized_edit_distance": 0.08309990662931839,
+        "mean_confidence": 0.9008071621259054,
+        "false_confidence_rate": 1.0
+      }
+    }
+  },
+  "diagnostics": {
+    "validation": {
+      "num_samples": 9,
+      "num_writers": 3,
+      "predictions_sha256": "d319b451b70f2d7e25dd43917c3833c7c2284d13afd57ffd1482ac11776b7fb9",
+      "exact_matches": 1,
+      "exact_errors": 8,
+      "exact_match_rate": 0.1111111111111111,
+      "mean_confidence": 0.6742640071445041,
+      "exact_match_ece": 0.563152896033393,
+      "exact_match_brier_score": 0.4034529180385944,
+      "mean_line_cer": 0.2874308561808562,
+      "mean_character_accuracy": 0.7125691438191438,
+      "confidence_character_accuracy_mae": 0.08572970747431635
+    },
+    "untouched_test_holdout": {
+      "num_samples": 6,
+      "num_writers": 2,
+      "exact_matches": 0,
+      "exact_errors": 6,
+      "exact_match_rate": 0.0,
+      "mean_confidence": 0.8573377331097921,
+      "exact_match_ece": 0.857337733109792,
+      "exact_match_brier_score": 0.7448955867176549,
+      "mean_line_cer": 0.15820433436532508,
+      "mean_character_accuracy": 0.8417956656346749,
+      "confidence_character_accuracy_mae": 0.03767765898207517
+    },
+    "failure_atlas": {
+      "private_sha256": "197911664dafe39aea85edfb984a2648970619132014cdab3c4034354d93abf2",
+      "num_failure_records": 14,
+      "sample_level_artifacts_committed": false,
+      "categories": {
+        "character_error_ge_0_25": 8,
+        "character_error_0_10_to_0_25": 5,
+        "character_error_below_0_10": 1,
+        "publisher_correction_marker": 8,
+        "model_marked_uncertain": 4,
+        "high_confidence_exact_error": 1
+      }
+    },
+    "labeling_queue": {
+      "private_sha256": "b0860bd4694a4ed6128acacb0b8edf8c809ef125060bc338db9a869ffe4224a2",
+      "validation_tasks": 9,
+      "failure_targeted_tasks": 8,
+      "coverage_control_tasks": 1,
+      "required_blind_annotation_assignments": 18,
+      "test_holdout_tasks_excluded": 6,
+      "double_blind_review_required": true,
+      "independent_adjudication_on_disagreement": true,
+      "model_predictions_visible": false,
+      "publisher_references_visible": false,
+      "failure_categories_visible": false,
+      "sample_level_artifacts_committed": false
+    },
+    "calibration_gate": {
+      "status": "blocked",
+      "target": "exact_transcription_match",
+      "minimum_fit_samples": 30,
+      "validation_policy": {
+        "minimum_coverage": 0.5,
+        "minimum_accepted_samples": 5,
+        "maximum_selective_cer": 0.1,
+        "status": "no_eligible_threshold",
+        "selected_threshold": null,
+        "searched_on": "validation_only"
+      },
+      "test_threshold_applied": false,
+      "automatic_acceptance_allowed": false,
+      "human_review_required": true,
+      "blockers": [
+        "validation_sample_count_below_calibration_minimum",
+        "no_validation_threshold_met_selective_risk_policy",
+        "publisher_references_are_not_independently_reviewed",
+        "noncommercial_research_evidence_only"
+      ]
+    }
+  },
+  "load_observation": {
+    "encoder_pooler_weights_reported_newly_initialized": true,
+    "interpretation": "Transformers reported unused encoder pooler parameters; the result is retained as a development baseline and not a release claim."
+  },
+  "claims": {
+    "gold_benchmark": false,
+    "production_pilot_evidence": false,
+    "commercial_use_evidence": false,
+    "protected_pilot_substitute": false,
+    "primary_school_accuracy": false,
+    "calibrated_confidence": false,
+    "automatic_acceptance_supported": false,
+    "human_annotation_completed": false
+  }
+}

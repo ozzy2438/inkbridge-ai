@@ -1,13 +1,17 @@
-# InkBridge AI — Model Card
+# InkBridge AI — Baseline Model Card
 
-## Model: TrOCR Fine-tuned for Student Handwriting
+## Model: Pretrained TrOCR baseline
+
+**Status:** Development baseline. No InkBridge fine-tuned checkpoint has been
+trained, evaluated, or published yet.
 
 ### Model Details
 - **Model type:** Vision Encoder-Decoder (ViT + RoBERTa)
 - **Base model:** microsoft/trocr-base-handwritten
-- **Fine-tuned on:** SMHD + GNHK + IAM + Augmented data
+- **Current checkpoint:** `microsoft/trocr-base-handwritten`
+- **Planned domain data:** SMHD + GNHK + IAM + controlled augmentations
 - **Parameters:** ~334M
-- **License:** MIT (model weights), CC-BY-NC (SMHD data)
+- **Model-weight license:** MIT; dataset licences remain separate
 
 ### Intended Use
 - Transcribing student handwritten essays and short answers
@@ -22,34 +26,65 @@
 - Performance degrades on very faint pencil writing
 - Not suitable for cursive scripts other than Latin
 
-### Training Data
-| Dataset | Samples | Writers | Purpose |
-|---------|---------|---------|----------|
-| IAM | 9,862 lines | 500 | Standard benchmark |
-| SMHD | ~2,000 lines | 500+ | Student messy writing |
-| GNHK | 9,363 lines | N/A | Camera-captured |
-| Augmented | ~20,000 | N/A | Robustness |
+### Planned Training Data
+
+The datasets below are candidates. Their presence in this table does not mean that they have been
+approved for training or used to change the checkpoint. SMHD has been used only for a local,
+non-commercial baseline inference rehearsal; it has not changed the model.
+
+| Dataset | Published scale | Purpose |
+|---------|-----------------|---------|
+| IAM | 13,353 lines | Standard benchmark |
+| SMHD line version | 500+ contributors | Non-commercial student-handwriting research rehearsal |
+| GNHK | 9,363 lines | Camera-captured handwriting |
+| Augmented | Not generated yet | Robustness |
 
 ### Evaluation Results
 
-*To be filled after training:*
+Two engineering smoke runs and one non-commercial research rehearsal exist for the pinned
+pretrained checkpoint. None is a student-handwriting gold benchmark, model comparison, or release-
+gate baseline.
 
-| Metric | Baseline | Fine-tuned | Improvement |
-|--------|----------|------------|-------------|
-| CER (IAM test) | TBD | TBD | TBD |
-| CER (GNHK test) | TBD | TBD | TBD |
-| CER (SMHD test) | TBD | TBD | TBD |
-| False Confidence Rate | TBD | TBD | TBD |
-| Calibration Error | TBD | TBD | TBD |
+| Set | Population | Test lines | CER | WER | False confidence |
+|---|---|---:|---:|---:|---:|
+| OpenHand-Synth smoke | Synthetic rendering styles | 6 | 0.0556 | 0.5000 | 0.6667 |
+| CSAFE smoke | Real adult writers | 5 | 0.0584 | 0.3214 | 0.5000 |
+| SMHD research rehearsal | Mixed student writers, unreviewed | 6 | 0.1300 | 0.3611 | 1.0000 |
+
+Raw smoke predictions, runtime/model provenance, manifest hashes, and evaluation reports are stored
+under `artifacts/smoke/`. The SMHD source, manifest, and predictions remain outside Git; only the
+[aggregate research result](../artifacts/research/smhd-trocr-base-v1/README.md) is committed. Its
+publisher references are not independently reviewed, and its six lines cannot estimate population
+accuracy. No fine-tuned model or independently verified child/student result exists.
+The private SMHD failure atlas covers all 15 validation-plus-test lines and contains 14 exact-match
+failures. A validation-only policy search found no confidence threshold that retained at least 50%
+coverage while holding selective CER at or below 0.10. The validation set also falls below the
+predeclared 30-sample minimum for fitting confidence calibration, so no calibration parameters were
+created and all outputs remain routed to human review.
+That routing is now materialized as a private nine-task validation queue requiring 18 blind
+annotation assignments and independent adjudication on disagreement. The queue deliberately hides
+model/publisher text and excludes all six test-holdout samples. No human review result is claimed.
+The protected self-hosted evaluation gate is implemented, but it has run only on synthetic control
+data. Its sealed local-model producer has likewise been exercised only with a deterministic fake
+backend; neither contributes a model-quality result to this table.
+
+The protected control plane now also binds an owner-only POSIX storage check and hash-chained
+consent-withdrawal/deletion evidence into intake, freeze, inference authorization, attestation, and
+evaluation. This is no substitute for independently verified provider IAM/encryption/audit logs or
+an authorised real-student run.
 
 ### Ethical Considerations
-- No student personal data in training set
-- Model trained on de-identified samples only
-- Abstention mechanism prevents silent hallucination
+- No private student data is included in this public repository
+- The SMHD derivative and sample-level artifacts remain outside Git under owner-only permissions;
+  CC BY-NC 4.0 forbids commercial use
+- A future pilot must pass the protected governance and double-annotation gate; a software pass is
+  not a legal/privacy certification
+- Abstention thresholds must be calibrated on an adequately sized, independently reviewed
+  validation set before operational use; the current SMHD gate explicitly failed this condition
 - Not used for automated grading or student assessment
 - Human review required for all uncertain predictions
 
 ### Environmental Impact
-- Training compute: ~8 GPU-hours (single A100)
-- Inference: ~50ms per line (GPU), ~200ms per line (CPU)
-- Carbon footprint: Estimated < 5 kg CO2eq
+
+Not measured. Training compute, inference latency, energy use, and carbon estimates
+will be reported from actual runs rather than projected values.

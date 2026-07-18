@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-07-17T11:18:50.955530+00:00",
+  "input": {
+    "dataset": {
+      "license_id": "cc-by-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "name": "openhand-synth-smoke",
+      "sample_type": "line",
+      "version": "8b5027ab2dc6cc944e0ce7fe37997ce046121e66-selection-v1"
+    },
+    "manifest_filename": "manifest.jsonl",
+    "manifest_metadata_sha256": "78ee329018af8d4c2cd74efd8c6bffa963a199e4de10d0774dc10e4bbd93d53a",
+    "manifest_sha256": "f3fbaea6e0ad3d91ea08b7e7ab4712041c41742214c98c6b5622f0c57284959d",
+    "num_records": 6,
+    "split": "test"
+  },
+  "model": {
+    "abstention_threshold": 0.4,
+    "batch_size": 2,
+    "beam_width": 4,
+    "confidence_threshold": 0.7,
+    "device": "cpu",
+    "dtype": "float32",
+    "max_length": 64,
+    "model_id": "microsoft/trocr-base-handwritten",
+    "model_version": "microsoft/trocr-base-handwritten@eaacaf452b06415df8f10bb6fad3a4c11e609406",
+    "requested_revision": "eaacaf452b06415df8f10bb6fad3a4c11e609406",
+    "resolved_revision": "eaacaf452b06415df8f10bb6fad3a4c11e609406",
+    "runtime": {
+      "huggingface_hub": "0.36.2",
+      "machine": "arm64",
+      "os": "Darwin",
+      "os_release": "27.0.0",
+      "python": "3.11.13",
+      "torch": "2.13.0",
+      "transformers": "4.57.6"
+    }
+  },
+  "output": {
+    "filename": "predictions.jsonl",
+    "num_records": 6,
+    "sha256": "b60d398794255293cab3c6075e3033a91c34c077ff4e22c33ed5fd81b1787995"
+  },
+  "privacy": {
+    "source_images_exported": false,
+    "writer_ids_exported": false
+  },
+  "schema_version": 1,
+  "status": "complete"
+}

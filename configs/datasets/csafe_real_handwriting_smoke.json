@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "purpose": "real_handwriting_pipeline_smoke_only",
+  "dataset": {
+    "article_id": 10062203,
+    "doi": "10.25380/iastate.10062203.v2",
+    "title": "CSAFE Handwriting Database",
+    "citation": "Crawford, Amy; Ray, Anyesha; Carriquiry, Alicia; Kruse, James; Peterson, Marc (2019). CSAFE Handwriting Database. Iowa State University. Dataset. https://doi.org/10.25380/iastate.10062203.v2",
+    "api_url": "https://api.figshare.com/v2/articles/10062203",
+    "source_url": "https://iastate.figshare.com/articles/dataset/CSAFE_Handwriting_Database/10062203/2",
+    "license_id": "CC-BY-4.0",
+    "license_name": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "readme": {
+      "file_id": 65793384,
+      "filename": "readme_v2.pdf",
+      "size": 225677,
+      "md5": "70106a90bf0c002eb529cccd009608c8"
+    },
+    "archive": {
+      "file_id": 65793390,
+      "filename": "Session 1.zip",
+      "size": 1569954149,
+      "md5": "1b8fb1c877156905b247e8f5ef13bdc0",
+      "download_url": "https://ndownloader.figshare.com/files/65793390"
+    }
+  },
+  "constraints": {
+    "language": "eng",
+    "sample_type": "line",
+    "population": "adults",
+    "contains_student_data": false,
+    "real_handwriting": true,
+    "prompt_id": "PHR",
+    "prompt": "The early bird may get the worm, but the second mouse gets the cheese.",
+    "reference_status": "prompt_derived_single_pass",
+    "gold_ready": false,
+    "source_pages_exported": false
+  },
+  "selection": [
+    {
+      "writer_id": "w0001",
+      "archive_path": "Session 1/w0001_s01_pPHR_r01.png",
+      "archive_size": 149129,
+      "archive_crc32": 2885806103,
+      "source_sha256": "d8be41ad80728c5b6b8e0cc9cf97dd587b4f243ae007bbc430546af68ec14647",
+      "width": 2550,
+      "height": 2811,
+      "lines": [
+        {
+          "bbox": [190, 45, 2400, 190],
+          "reference": "The early bird may get the worm, but",
+          "output_sha256": "59622a79e81fe4a9380e3652991e3f6fac02bef898eb1c2f8d34e131280eac7c"
+        },
+        {
+          "bbox": [190, 190, 2180, 310],
+          "reference": "the second mouse gets the cheese.",
+          "output_sha256": "9ab011c84b7ad9d05c63e21d3527f1efd2abccdda1d52c22629186848edc7d65"
+        }
+      ]
+    },
+    {
+      "writer_id": "w0002",
+      "archive_path": "Session 1/w0002_s01_pPHR_r01.png",
+      "archive_size": 105120,
+      "archive_crc32": 1306622495,
+      "source_sha256": "14c10cadb702a2e20c5922083878067ef5f10a6a2a8e9191b9d6ba6538ca0366",
+      "width": 2544,
+      "height": 2804,
+      "lines": [
+        {
+          "bbox": [220, 115, 2330, 265],
+          "reference": "The early bird may get the worm, but the second mouse gets the cheese.",
+          "output_sha256": "fdb08d3d519cd4280762e76b4c0cf993205c5c49d9ed368d049f24d4d01a601f"
+        }
+      ]
+    },
+    {
+      "writer_id": "w0003",
+      "archive_path": "Session 1/w0003_s01_pPHR_r01.png",
+      "archive_size": 150263,
+      "archive_crc32": 1303353692,
+      "source_sha256": "e1e6b94d90990b91049acb6bea0ed0c6ff737a050ff0189289a9b63906ac0975",
+      "width": 2550,
+      "height": 2802,
+      "lines": [
+        {
+          "bbox": [170, 95, 2300, 225],
+          "reference": "The early bird may get the worm, but the second",
+          "output_sha256": "7202e669aab1cb9e971c010b5d48403a33e0c5a77c16eb6e531b06045aea6faf"
+        },
+        {
+          "bbox": [190, 225, 1220, 335],
+          "reference": "mouse gets the cheese.",
+          "output_sha256": "4d4cf6e6dbfd71c98ae5bf691bf17eb755a692f37f2d9616b21c3e8472710338"
+        }
+      ]
+    },
+    {
+      "writer_id": "w0004",
+      "archive_path": "Session 1/w0004_s01_pPHR_r01.png",
+      "archive_size": 206439,
+      "archive_crc32": 2214828876,
+      "source_sha256": "32b8ca20688c5365d5d3e445677c47fb39e3335195275523aa4d73470de6027d",
+      "width": 2550,
+      "height": 2807,
+      "lines": [
+        {
+          "bbox": [50, 70, 2280, 285],
+          "reference": "The early bird may get the worm,",
+          "output_sha256": "f35e306e6c95cacbea331bcbcec3014b98e90090c9f21cfed39922bb066c1ffa"
+        },
+        {
+          "bbox": [70, 300, 2220, 470],
+          "reference": "but the second mouse gets the",
+          "output_sha256": "2b99a605314606f73490cb68a98f57522f9ee014dc9548960fba9d4e5d808d18"
+        },
+        {
+          "bbox": [50, 470, 520, 630],
+          "reference": "cheese.",
+          "output_sha256": "2c11b3b081b55d16a734035ebbdcad26167eec817cbf7f15c818656687173ae8"
+        }
+      ]
+    },
+    {
+      "writer_id": "w0005",
+      "archive_path": "Session 1/w0005_s01_pPHR_r01.png",
+      "archive_size": 152977,
+      "archive_crc32": 3625747247,
+      "source_sha256": "ea606661dc39e080ea000ea37059f244ddf6f3674a3b3e02f1351c1a7a0e6b31",
+      "width": 2543,
+      "height": 2802,
+      "lines": [
+        {
+          "bbox": [140, 0, 2400, 135],
+          "reference": "The early bird may get the worm, but the second mouse gets",
+          "output_sha256": "21aa2b5f9333b27bbd21a39fd722eea47427892ec93273e93bca328f4acb89a0"
+        },
+        {
+          "bbox": [140, 135, 660, 225],
+          "reference": "the cheese.",
+          "output_sha256": "7af6d09afb3d228ab8ad858694751e60acaf0f128e037ab491857e4081a941d3"
+        }
+      ]
+    },
+    {
+      "writer_id": "w0006",
+      "archive_path": "Session 1/w0006_s01_pPHR_r01.png",
+      "archive_size": 182094,
+      "archive_crc32": 446396173,
+      "source_sha256": "a3fd67e47c3dff8263e4a40025893c36c69adea9d3c7d1563ad3618437e70b02",
+      "width": 2550,
+      "height": 2815,
+      "lines": [
+        {
+          "bbox": [160, 0, 2420, 150],
+          "reference": "The early bird may get the worm, but the second",
+          "output_sha256": "3d1ebe869741aa1269437398d9de357b0833447a1597093fc129b2ead04892fd"
+        },
+        {
+          "bbox": [160, 150, 2050, 270],
+          "reference": "mouse gets the cheese.",
+          "output_sha256": "38ff976b2836d96f0ae56b6a6e394ab215d56e0acc02ba08b3c9abbaf6210094"
+        }
+      ]
+    },
+    {
+      "writer_id": "w0009",
+      "archive_path": "Session 1/w0009_s01_pPHR_r01.png",
+      "archive_size": 213658,
+      "archive_crc32": 2119927115,
+      "source_sha256": "811cb18bf36564d1e133d45be222f1f6267acadaf095105a11e1de68e199f56c",
+      "width": 2550,
+      "height": 2826,
+      "lines": [
+        {
+          "bbox": [250, 60, 2220, 235],
+          "reference": "The early bird may get the worm,",
+          "output_sha256": "0e0132c62d62d5025d3d97bf55e657984f2911dcf42c438a5edb0041da75dd6a"
+        },
+        {
+          "bbox": [300, 235, 2070, 395],
+          "reference": "but the second mouse gets the",
+          "output_sha256": "c63f735e8fe5f4324a748c322188f242cdf86d02341fe0fc7cd38a97e56c63e0"
+        },
+        {
+          "bbox": [300, 395, 730, 525],
+          "reference": "cheese.",
+          "output_sha256": "906a5f55918cfa31384a43de143fd9d6c394afb36c012ccaa66f3f10c6bfe92c"
+        }
+      ]
+    },
+    {
+      "writer_id": "w0010",
+      "archive_path": "Session 1/w0010_s01_pPHR_r01.png",
+      "archive_size": 169296,
+      "archive_crc32": 3474209963,
+      "source_sha256": "9b4017d64c68973d1adb89668040f674fe7b9173f0ef962dbac046cd24702c34",
+      "width": 2545,
+      "height": 2803,
+      "lines": [
+        {
+          "bbox": [90, 25, 2210, 165],
+          "reference": "The early bird may get the worm,",
+          "output_sha256": "21ef2c3a93e8a677814f7d93fb9198b3e9ff40a01f2bfd7bc816004d58889268"
+        },
+        {
+          "bbox": [90, 165, 2240, 315],
+          "reference": "but the second mouse gets the cheese.",
+          "output_sha256": "cee4425d8928e1688dad99b93830205a1684a24f149b9b5a31c69f049be20542"
+        }
+      ]
+    },
+    {
+      "writer_id": "w0011",
+      "archive_path": "Session 1/w0011_s01_pPHR_r01.png",
+      "archive_size": 149618,
+      "archive_crc32": 283167740,
+      "source_sha256": "507b3c49d7c405cf2fb60951194eadd5513a4f4b7709fe11ec168626d05fd652",
+      "width": 2550,
+      "height": 2802,
+      "lines": [
+        {
+          "bbox": [200, 35, 2030, 135],
+          "reference": "The early bird may get the worm, but the second mouse",
+          "output_sha256": "94b005154e2e1f95320dbf125c056aaad0e0ab72b63f5a3c93f7c7c4f4248b93"
+        },
+        {
+          "bbox": [220, 140, 850, 225],
+          "reference": "gets the cheese.",
+          "output_sha256": "090c47335c7c71fcf30ca4dad49ce089fd13e6a84217edcda370a26e3f48ab63"
+        }
+      ]
+    }
+  ]
+}

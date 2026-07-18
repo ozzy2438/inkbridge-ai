@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "execution_environment": "pending",
+  "executed_at": "replace_me",
+  "operator_role": "replace_me",
+  "approval_reference": "replace_me",
+  "inference_authorization_sha256": "replace_me",
+  "model_version": "replace_me",
+  "model_artifact_sha256": "replace_me",
+  "inference_config_sha256": "replace_me",
+  "evaluation_set_id": "replace_me",
+  "manifest_sha256": "replace_me",
+  "storage_control_sha256": "replace_me",
+  "lifecycle_ledger_head_sha256": "replace_me",
+  "predictions_sha256": "replace_me",
+  "protected_storage_mounted": false,
+  "network_access_during_inference": false,
+  "external_ai_services_used": false,
+  "github_actions_used": false,
+  "model_artifacts_preloaded": false,
+  "predictions_contain_references": false,
+  "automated_decisions_enabled": false
+}

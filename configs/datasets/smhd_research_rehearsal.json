@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "purpose": "offline_student_handwriting_research_shadow_rehearsal_only",
+  "dataset": {
+    "article_id": 24419986,
+    "doi": "10.25439/rmt.24419986.v1",
+    "title": "A Messy Handwriting Dataset with Student Crossouts and Corrections (Line-version)",
+    "citation": "Nisa, Hiqmat (2023). A Messy Handwriting Dataset with Student Crossouts and Corrections (Line-version). RMIT University. Dataset. https://doi.org/10.25439/rmt.24419986.v1",
+    "api_url": "https://api.figshare.com/v2/articles/24419986",
+    "source_url": "https://research-repository.rmit.edu.au/articles/dataset/A_Messy_Handwriting_Dataset_with_Student_Crossouts_and_Corrections_Line-version_/24419986",
+    "license_id": "CC-BY-NC-4.0",
+    "license_name": "CC BY-NC 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "archive": {
+      "file_id": 42858925,
+      "filename": "SMHD-lines.zip",
+      "size": 458989544,
+      "md5": "21d587518c1a952ad3590cb3761fc089",
+      "sha256": "ef3c7852f61e32f4242f902da73ba1a66847bcf2c0c93ee4ed93c0299d12192a",
+      "download_url": "https://ndownloader.figshare.com/files/42858925"
+    }
+  },
+  "constraints": {
+    "language": "eng",
+    "sample_type": "line",
+    "population": "mixed_high_school_and_university_students",
+    "contains_student_data": true,
+    "real_handwriting": true,
+    "source_capture": "300_dpi_grayscale_scan",
+    "commercial_use_allowed": false,
+    "production_pilot_evidence": false,
+    "offline_only": true,
+    "repository_artifacts_allowed": false,
+    "reference_status": "publisher_transcription_unreviewed",
+    "reference_transform": "remove_hash_markers_and_collapse_whitespace",
+    "gold_ready": false,
+    "max_source_image_bytes": 200000
+  },
+  "archive_inventory": {
+    "entries": 9632,
+    "png_entries": 9103,
+    "index_files": {
+      "SMHD.txt": {
+        "size": 387238,
+        "sha256": "9eb8e9eea99d98e3b7bb5cb723d98d56a53cd873fc1296821c13a235347ec0eb",
+        "records": 8376,
+        "usable_records": 8367,
+        "writers": 480
+      },
+      "Class_Notes_SMHD.txt": {
+        "size": 26707,
+        "sha256": "2530fd27ecd7b2313f7742fb8f02870a7705250b6097ff3c919086b9e66d144f",
+        "records": 582
+      },
+      "SMHD-Cross-outsandInsertions.txt": {
+        "size": 71415,
+        "sha256": "2d106e4ae2f1c4f9a8b0a51b4b66c7b6de767d7279f9b0ee5ecb1a4d5470336f",
+        "records": 1593
+      }
+    }
+  },
+  "selection": {
+    "algorithm": "sha256_ranked_mixed_clean_and_marker_v1",
+    "seed": "inkbridge-smhd-line-v1-research-shadow-2026-07-18",
+    "index_filename": "SMHD.txt",
+    "writers": 12,
+    "samples_per_writer": 3,
+    "required_clean_per_writer": 1,
+    "required_marked_per_writer": 1
+  }
+}

@@ -1,14 +1,14 @@
 """Human review endpoints for uncertain predictions."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Optional
 
 router = APIRouter()
 
 
 class ReviewItem(BaseModel):
     """A single item requiring human review."""
+
     item_id: str
     page_id: str
     job_id: str
@@ -16,29 +16,30 @@ class ReviewItem(BaseModel):
     predicted_text: str
     confidence: float
     bbox: list[int]
-    context_before: Optional[str] = None
-    context_after: Optional[str] = None
+    context_before: str | None = None
+    context_after: str | None = None
     model_version: str
-    failure_category: Optional[str] = None
+    failure_category: str | None = None
 
 
 class ReviewSubmission(BaseModel):
     """Human reviewer's correction."""
+
     item_id: str
     corrected_text: str
     is_unreadable: bool = False
     is_crossed_out: bool = False
-    reviewer_notes: Optional[str] = None
+    reviewer_notes: str | None = None
 
 
 @router.get("/review/queue")
 async def get_review_queue(
-    job_id: Optional[str] = None,
+    job_id: str | None = None,
     limit: int = 20,
     priority: str = "uncertainty",
 ):
     """Get items needing human review, prioritized by uncertainty.
-    
+
     Priority modes:
     - uncertainty: Lowest confidence first
     - impact: Highest operational impact first
@@ -51,7 +52,7 @@ async def get_review_queue(
 @router.post("/review/submit")
 async def submit_review(submission: ReviewSubmission):
     """Submit a human review correction.
-    
+
     The correction is:
     1. Stored in the audit trail
     2. Applied to the transcript
@@ -66,7 +67,7 @@ async def submit_review(submission: ReviewSubmission):
 
 
 @router.get("/review/stats")
-async def get_review_stats(job_id: Optional[str] = None):
+async def get_review_stats(job_id: str | None = None):
     """Get review operation statistics."""
     return {
         "total_reviewed": 0,
