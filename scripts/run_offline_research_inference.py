@@ -26,6 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-length", type=int, default=128)
     parser.add_argument("--confidence-threshold", type=float, default=0.7)
     parser.add_argument("--abstention-threshold", type=float, default=0.4)
+    parser.add_argument("--split", choices=("validation", "test"), default="test")
     parser.add_argument("--no-resume", action="store_true")
     return parser.parse_args()
 
@@ -63,6 +64,7 @@ def main() -> int:
         max_length=args.max_length,
         confidence_threshold=args.confidence_threshold,
         abstention_threshold=args.abstention_threshold,
+        split=args.split,
         resume=not args.no_resume,
         repository_root=args.repository_root,
     )

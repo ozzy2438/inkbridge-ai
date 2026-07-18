@@ -29,6 +29,11 @@ _EXPECTED_DATASET = {
     "sample_type": "line",
 }
 _EXPECTED_PURPOSE = "offline_student_handwriting_research_shadow_rehearsal_only"
+_EXPECTED_SPLITS = {
+    "train": {"samples": 21, "writers": 7},
+    "validation": {"samples": 9, "writers": 3},
+    "test": {"samples": 6, "writers": 2},
+}
 _ALLOWED_OUTPUT_FILES = {
     "prediction_state.json",
     "predictions.partial.jsonl",
@@ -52,10 +57,11 @@ def produce_offline_research_prediction_artifact(
     max_length: int = 128,
     confidence_threshold: float = 0.7,
     abstention_threshold: float = 0.4,
+    split: str = "test",
     resume: bool = True,
     repository_root: str | Path | None = None,
 ) -> dict[str, Any]:
-    """Run test-split inference with a sealed model and no Python network access."""
+    """Run validation/test inference with a sealed model and no Python network access."""
     reject_ci_environment("Offline research inference")
     _validate_runtime_settings(
         model_version=model_version,
@@ -66,6 +72,7 @@ def produce_offline_research_prediction_artifact(
         max_length=max_length,
         confidence_threshold=confidence_threshold,
         abstention_threshold=abstention_threshold,
+        split=split,
     )
     repository = Path(repository_root or Path.cwd()).resolve(strict=True)
     dataset = _validated_external_directory(dataset_dir, repository, "SMHD dataset")
@@ -116,7 +123,7 @@ def produce_offline_research_prediction_artifact(
             dataset,
             destination,
             backend,
-            split="test",
+            split=split,
             batch_size=batch_size,
             resume=resume,
         )
@@ -136,6 +143,7 @@ def produce_offline_research_prediction_artifact(
         model_artifact=model_artifact,
         prediction_metadata=prediction_metadata,
         expected_provenance=expected_provenance,
+        split=split,
     )
     attestation_path = destination / ATTESTATION_FILENAME
     if attestation_path.exists():
@@ -164,6 +172,7 @@ def _validate_runtime_settings(
     max_length: int,
     confidence_threshold: float,
     abstention_threshold: float,
+    split: str,
 ) -> None:
     if (
         not model_version
@@ -190,6 +199,8 @@ def _validate_runtime_settings(
         raise ValueError(
             "thresholds must satisfy 0 <= abstention_threshold <= confidence_threshold <= 1"
         )
+    if split not in {"validation", "test"}:
+        raise ValueError("research inference split must be validation or test")
 
 
 def _validate_smhd_package(dataset: Path) -> dict[str, str]:
@@ -249,8 +260,15 @@ def _validate_smhd_package(dataset: Path) -> dict[str, str]:
         raise ValueError("SMHD manifest must assert writer-isolated splits")
     sample_counts = _required_mapping(split, "sample_counts", "manifest metadata split")
     writer_counts = _required_mapping(split, "writer_counts", "manifest metadata split")
-    if sample_counts.get("test") != 6 or writer_counts.get("test") != 2:
-        raise ValueError("SMHD research test split must contain 6 samples from 2 writers")
+    for split_name, expected in _EXPECTED_SPLITS.items():
+        if (
+            sample_counts.get(split_name) != expected["samples"]
+            or writer_counts.get(split_name) != expected["writers"]
+        ):
+            raise ValueError(
+                f"SMHD research {split_name} split must contain "
+                f"{expected['samples']} samples from {expected['writers']} writers"
+            )
 
     binding = _input_binding(dataset)
     if manifest_details.get("sha256") != binding["manifest_sha256"]:
@@ -290,6 +308,7 @@ def _build_attestation(
     model_artifact: Mapping[str, Any],
     prediction_metadata: Mapping[str, Any],
     expected_provenance: Mapping[str, Any],
+    split: str,
 ) -> dict[str, Any]:
     output = _required_mapping(prediction_metadata, "output", "prediction metadata")
     input_details = _required_mapping(prediction_metadata, "input", "prediction metadata")
@@ -300,9 +319,9 @@ def _build_attestation(
         "evidence_scope": "noncommercial_research_rehearsal_only",
         "dataset": {
             **_EXPECTED_DATASET,
-            "split": "test",
+            "split": split,
             "num_records": input_details["num_records"],
-            "test_writers": 2,
+            "num_writers": _EXPECTED_SPLITS[split]["writers"],
             **dict(input_binding),
         },
         "model": {

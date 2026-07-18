@@ -172,6 +172,7 @@ python -m scripts.run_offline_research_inference \
   --model-dir /private/models/trocr-base-handwritten-<revision> \
   --model-version microsoft-trocr-base-handwritten-<revision>-smhd-research-v1 \
   --model-artifact-sha256 <sealed-directory-sha256> \
+  --split test \
   --device cpu \
   --batch-size 2 \
   --beam-width 4 \
@@ -182,6 +183,24 @@ The command refuses CI and revalidates the dataset and sealed model after infere
 sample-level predictions owner-only and emits an aggregate-safe execution attestation. The
 [captured v1 result](../artifacts/research/smhd-trocr-base-v1/README.md) records six real test lines
 from two isolated writers; it remains unreviewed, non-commercial research evidence.
+
+For failure analysis and confidence-policy diagnostics, produce the validation and test splits into
+separate owner-only run directories, then run:
+
+```bash
+python -m scripts.run_offline_research_diagnostics \
+  --validation-run-dir /private/research/smhd-line-v1/runs/validation-v1 \
+  --test-run-dir /private/research/smhd-line-v1/runs/test-v1 \
+  --output-dir /private/research/smhd-line-v1/diagnostics/v1 \
+  --minimum-calibration-samples 30 \
+  --minimum-policy-coverage 0.5 \
+  --maximum-selective-cer 0.1
+```
+
+The command rejects CI, repository paths, non-owner-only storage, mismatched model provenance, and
+validation/test sample overlap. It keeps the sample-level failure atlas outside Git and emits a
+separate aggregate diagnostic. Thresholds are searched on validation only and are applied once to
+the untouched test split only when the validation policy succeeds.
 
 ## Build the manifest
 

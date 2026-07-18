@@ -215,6 +215,7 @@ def _run(
     backend_class: type[FakeResearchBackend] = FakeResearchBackend,
     *,
     resume: bool = True,
+    split: str = "test",
 ) -> dict[str, Any]:
     def factory(model_version: str, model_sha256: str, device: str) -> FakeResearchBackend:
         return backend_class(model_version, model_sha256, device)
@@ -228,6 +229,7 @@ def _run(
         backend_factory=factory,
         device="cpu",
         batch_size=2,
+        split=split,
         resume=resume,
         repository_root=repository,
     )
@@ -250,7 +252,7 @@ def test_produces_private_offline_research_evidence(
     assert len(predictions) == 6
     assert all("writer_id" not in record for record in predictions)
     assert result["prediction_metadata"]["input"]["num_records"] == 6
-    assert result["attestation"]["dataset"]["test_writers"] == 2
+    assert result["attestation"]["dataset"]["num_writers"] == 2
     assert result["attestation"]["execution"]["network_access_allowed"] is False
     assert result["attestation"]["claims"]["gold_benchmark"] is False
     assert repeated["attestation"] == result["attestation"]
@@ -260,6 +262,26 @@ def test_produces_private_offline_research_evidence(
     if os.name == "posix":
         assert stat.S_IMODE(output.stat().st_mode) == 0o700
         assert all(stat.S_IMODE(path.stat().st_mode) == 0o600 for path in output.iterdir())
+
+
+def test_produces_writer_isolated_validation_predictions(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_ci(monkeypatch)
+    repository, dataset, model, runs, artifact = _inputs(tmp_path)
+
+    result = _run(
+        repository,
+        dataset,
+        model,
+        runs / "validation",
+        artifact,
+        split="validation",
+    )
+
+    assert result["prediction_metadata"]["input"]["split"] == "validation"
+    assert result["prediction_metadata"]["output"]["num_records"] == 9
+    assert result["attestation"]["dataset"]["num_writers"] == 3
 
 
 def test_blocks_network_connections_during_prediction(

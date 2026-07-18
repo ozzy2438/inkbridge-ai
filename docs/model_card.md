@@ -56,6 +56,11 @@ under `artifacts/smoke/`. The SMHD source, manifest, and predictions remain outs
 [aggregate research result](../artifacts/research/smhd-trocr-base-v1/README.md) is committed. Its
 publisher references are not independently reviewed, and its six lines cannot estimate population
 accuracy. No fine-tuned model or independently verified child/student result exists.
+The private SMHD failure atlas covers all 15 validation-plus-test lines and contains 14 exact-match
+failures. A validation-only policy search found no confidence threshold that retained at least 50%
+coverage while holding selective CER at or below 0.10. The validation set also falls below the
+predeclared 30-sample minimum for fitting confidence calibration, so no calibration parameters were
+created and all outputs remain routed to human review.
 The protected self-hosted evaluation gate is implemented, but it has run only on synthetic control
 data. Its sealed local-model producer has likewise been exercised only with a deterministic fake
 backend; neither contributes a model-quality result to this table.
@@ -71,7 +76,8 @@ an authorised real-student run.
   CC BY-NC 4.0 forbids commercial use
 - A future pilot must pass the protected governance and double-annotation gate; a software pass is
   not a legal/privacy certification
-- Abstention thresholds must be calibrated before operational use
+- Abstention thresholds must be calibrated on an adequately sized, independently reviewed
+  validation set before operational use; the current SMHD gate explicitly failed this condition
 - Not used for automated grading or student assessment
 - Human review required for all uncertain predictions
 

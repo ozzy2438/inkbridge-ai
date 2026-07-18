@@ -255,7 +255,9 @@ benchmark claims. The
 [SMHD offline research result](artifacts/research/smhd-trocr-base-v1/README.md) adds the first real
 student-handwriting model run: six unreviewed, writer-isolated lines processed from a sealed local
 model with no network access. Its CER is 0.1300 and WER is 0.3611, but it is non-commercial research
-evidence—not a gold benchmark or protected pilot. The next gold evidence level still requires
+evidence—not a gold benchmark or protected pilot. A private 15-line validation-plus-test failure
+atlas is also complete. Its calibration gate found no threshold meeting 50% validation coverage at
+CER <= 0.10, so automatic acceptance remains disabled. The next gold evidence level still requires
 independently verified, authorised child/student data.
 
 | Category | Metrics |
@@ -286,7 +288,9 @@ independently verified, authorised child/student data.
   baselines plus an offline SMHD research baseline complete; real consented gold and independent
   infrastructure evidence pending)**
 - [ ] Week 3-4: Quality gate, layout segmentation, TrOCR baseline **(prototype implemented; validation pending)**
-- [ ] Week 5-6: Domain fine-tuning, failure analysis, calibration
+- [ ] Week 5-6: Domain fine-tuning, failure analysis, calibration **(private SMHD failure atlas and
+  fail-closed calibration eligibility gate complete; fine-tuning and statistically adequate,
+  independently reviewed calibration data pending)**
 - [ ] Week 7: VLM fallback & structured JSON SFT
 - [ ] Week 8: Label Studio, annotation workflow, active learning
 - [ ] Week 9: Quantization, distillation, latency benchmarks

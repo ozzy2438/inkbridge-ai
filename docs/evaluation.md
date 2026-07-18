@@ -106,6 +106,14 @@ production claims. It loads the processor/model with `local_files_only=True`, en
 library flags, and blocks new Python socket connections. `result.json` retains only aggregate
 metrics, runtime facts, and hashes.
 
+The offline diagnostic path keeps threshold selection separate from the holdout: nine lines from
+three validation writers feed a fixed threshold-policy search, while six lines from two test
+writers remain untouched. It writes references, predictions, pseudonymous sample IDs, and failure
+categories only to an owner-only private atlas outside Git. The committed aggregate records 14
+failure lines, but the calibration gate is blocked: the validation set is below the predeclared
+30-sample minimum and no threshold achieved at least 50% coverage with selective CER <= 0.10. No
+threshold was applied to test and automatic acceptance remains disabled.
+
 ## GitHub Actions
 
 The manually dispatched `Baseline Predictions` workflow downloads a self-contained dataset
