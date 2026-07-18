@@ -64,7 +64,7 @@ def _private_tree(root: Path) -> None:
 
 
 def _record(split: str, index: int, *, source_offset: int = 0) -> dict[str, Any]:
-    exact = index % 4 == 0
+    exact = split == "validation" and index == 0
     return {
         "schema_version": 1,
         "sample_id": f"{split}-fixture-{index:02d}",
@@ -199,6 +199,11 @@ def test_builds_private_failure_atlas_and_aggregate_diagnostic(
     assert "validation_sample_count_below_calibration_minimum" in rendered
     assert aggregate["operational_decision"]["automatic_acceptance_allowed"] is False
     assert aggregate["claims"]["calibrated_confidence"] is False
+    assert aggregate["labeling_queue"]["validation_tasks"] == 9
+    assert aggregate["labeling_queue"]["failure_targeted_tasks"] == 8
+    assert aggregate["labeling_queue"]["coverage_control_tasks"] == 1
+    assert aggregate["labeling_queue"]["required_blind_annotation_assignments"] == 18
+    assert aggregate["labeling_queue"]["test_holdout_tasks_excluded"] == 6
     assert "sample_id" not in rendered
     assert "fixture reference" not in rendered
 
@@ -210,6 +215,20 @@ def test_builds_private_failure_atlas_and_aggregate_diagnostic(
     assert all(record["human_review_required"] is True for record in atlas)
     assert any("publisher_correction_marker" in record["categories"] for record in atlas)
     assert any("high_confidence_exact_error" in record["categories"] for record in atlas)
+
+    queue = [
+        json.loads(line)
+        for line in (output / "blind_labeling_queue.private.jsonl").read_text().splitlines()
+    ]
+    assert len(queue) == 9
+    queue_rendered = json.dumps(queue, sort_keys=True)
+    assert "fixture reference" not in queue_rendered
+    assert '"prediction"' not in queue_rendered
+    assert '"reference"' not in queue_rendered
+    assert '"confidence"' not in queue_rendered
+    assert '"categories"' not in queue_rendered
+    assert all(task["review_protocol"]["required_blind_passes"] == 2 for task in queue)
+    assert all(task["review_protocol"]["model_prediction_visible"] is False for task in queue)
 
     if os.name == "posix":
         assert stat.S_IMODE(output.stat().st_mode) == 0o700

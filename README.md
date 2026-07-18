@@ -257,8 +257,9 @@ student-handwriting model run: six unreviewed, writer-isolated lines processed f
 model with no network access. Its CER is 0.1300 and WER is 0.3611, but it is non-commercial research
 evidence—not a gold benchmark or protected pilot. A private 15-line validation-plus-test failure
 atlas is also complete. Its calibration gate found no threshold meeting 50% validation coverage at
-CER <= 0.10, so automatic acceptance remains disabled. The next gold evidence level still requires
-independently verified, authorised child/student data.
+CER <= 0.10, so automatic acceptance remains disabled. A blind double-review queue now covers all
+nine validation lines while preserving the six-line test holdout. The next gold evidence level
+still requires humans to execute that review on independently verified, authorised data.
 
 | Category | Metrics |
 |----------|--------|
@@ -292,7 +293,8 @@ independently verified, authorised child/student data.
   fail-closed calibration eligibility gate complete; fine-tuning and statistically adequate,
   independently reviewed calibration data pending)**
 - [ ] Week 7: VLM fallback & structured JSON SFT
-- [ ] Week 8: Label Studio, annotation workflow, active learning
+- [ ] Week 8: Label Studio, annotation workflow, active learning **(privacy-safe priority queue and
+  double-blind assignment contract complete; human annotation execution pending)**
 - [ ] Week 9: Quantization, distillation, latency benchmarks
 - [ ] Week 10: API, async batch pipeline, monitoring, CI/CD
 - [ ] Week 11: Shadow pilot, reviewer-time measurement
@@ -301,6 +303,9 @@ independently verified, authorised child/student data.
 ## 🤝 Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+For a concise, evidence-backed application/interview view, see the
+[portfolio summary](docs/portfolio_summary.md).
 
 ## 📄 License
 

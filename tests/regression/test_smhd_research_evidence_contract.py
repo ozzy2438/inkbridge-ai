@@ -47,6 +47,16 @@ def test_smhd_research_evidence_remains_aggregate_only_and_traceable() -> None:
     assert diagnostics["untouched_test_holdout"]["num_samples"] == 6
     assert diagnostics["failure_atlas"]["num_failure_records"] == 14
     assert diagnostics["failure_atlas"]["sample_level_artifacts_committed"] is False
+    queue = diagnostics["labeling_queue"]
+    assert queue["validation_tasks"] == 9
+    assert queue["failure_targeted_tasks"] == 8
+    assert queue["coverage_control_tasks"] == 1
+    assert queue["required_blind_annotation_assignments"] == 18
+    assert queue["test_holdout_tasks_excluded"] == 6
+    assert queue["double_blind_review_required"] is True
+    assert queue["model_predictions_visible"] is False
+    assert queue["publisher_references_visible"] is False
+    assert queue["sample_level_artifacts_committed"] is False
     assert diagnostics["calibration_gate"]["status"] == "blocked"
     assert diagnostics["calibration_gate"]["validation_policy"]["status"] == (
         "no_eligible_threshold"

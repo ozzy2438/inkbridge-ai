@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import os
@@ -61,6 +62,7 @@ _REQUIRED_RUN_FILES = {
     "research_execution_attestation.json",
 }
 _ALLOWED_OUTPUT_FILES = {
+    "blind_labeling_queue.private.jsonl",
     "failure_atlas.private.jsonl",
     "research_diagnostics.aggregate.json",
 }
@@ -122,6 +124,14 @@ def build_offline_research_diagnostics(
     atlas_path = destination / "failure_atlas.private.jsonl"
     with _private_umask():
         _write_jsonl_private_atomic(atlas_path, atlas_records)
+    labeling_queue = _build_blind_labeling_queue(
+        validation.records,
+        atlas_records=atlas_records,
+        manifest_sha256=validation.dataset_binding["manifest_sha256"],
+    )
+    labeling_queue_path = destination / "blind_labeling_queue.private.jsonl"
+    with _private_umask():
+        _write_jsonl_private_atomic(labeling_queue_path, labeling_queue)
 
     validation_diagnostic = _calibration_diagnostic(validation.records)
     test_diagnostic = _calibration_diagnostic(test.records)
@@ -160,6 +170,23 @@ def build_offline_research_diagnostics(
             "private_sha256": sha256_file(atlas_path),
             "num_failure_records": len(atlas_records),
             "categories": _aggregate_categories(atlas_records),
+            "sample_level_artifacts_committed": False,
+        },
+        "labeling_queue": {
+            "private_filename": labeling_queue_path.name,
+            "private_sha256": sha256_file(labeling_queue_path),
+            "validation_tasks": len(labeling_queue),
+            "failure_targeted_tasks": len(atlas_records)
+            - sum(record["split"] == "test" for record in atlas_records),
+            "coverage_control_tasks": len(labeling_queue)
+            - (len(atlas_records) - sum(record["split"] == "test" for record in atlas_records)),
+            "required_blind_annotation_assignments": len(labeling_queue) * 2,
+            "test_holdout_tasks_excluded": len(test.records),
+            "model_predictions_visible": False,
+            "publisher_references_visible": False,
+            "failure_categories_visible": False,
+            "double_blind_review_required": True,
+            "independent_adjudication_on_disagreement": True,
             "sample_level_artifacts_committed": False,
         },
         "calibration": {
@@ -463,6 +490,67 @@ def _severity_category(line_cer: float) -> str:
     if line_cer >= 0.1:
         return "character_error_0_10_to_0_25"
     return "character_error_below_0_10"
+
+
+def _build_blind_labeling_queue(
+    validation_records: tuple[EvaluationRecord, ...],
+    *,
+    atlas_records: list[dict[str, Any]],
+    manifest_sha256: str,
+) -> list[dict[str, Any]]:
+    failures = {
+        str(record["sample_id"]): record
+        for record in atlas_records
+        if record["split"] == "validation"
+    }
+    ranked: list[tuple[float, EvaluationRecord]] = []
+    for record in validation_records:
+        failure = failures.get(record.sample_id)
+        ranked.append((_labeling_priority(failure), record))
+    ranked.sort(key=lambda item: (-item[0], item[1].sample_id))
+
+    queue = []
+    for _, record in ranked:
+        task_digest = hashlib.sha256(
+            (
+                f"{manifest_sha256}:{record.source_sha256}:{record.sample_id}:"
+                "inkbridge-double-blind-v1"
+            ).encode()
+        ).hexdigest()
+        queue.append(
+            {
+                "schema_version": 1,
+                "task_id": f"label-{task_digest[:24]}",
+                "sample_id": record.sample_id,
+                "source_sha256": record.source_sha256,
+                "dataset_manifest_sha256": manifest_sha256,
+                "status": "awaiting_blind_annotation",
+                "review_protocol": {
+                    "guideline_version": "inkbridge-annotation-v2",
+                    "required_blind_passes": 2,
+                    "model_prediction_visible": False,
+                    "publisher_reference_visible": False,
+                    "failure_category_visible": False,
+                    "independent_adjudication_on_disagreement": True,
+                },
+            }
+        )
+    return queue
+
+
+def _labeling_priority(failure: Mapping[str, Any] | None) -> float:
+    if failure is None:
+        return -1.0
+    categories = set(failure["categories"])
+    priority = min(float(failure["line_cer"]), 1.0) * 0.4
+    priority += float(failure["confidence"]) * 0.25
+    if "publisher_correction_marker" in categories:
+        priority += 0.15
+    if "model_marked_uncertain" in categories:
+        priority += 0.1
+    if "high_confidence_exact_error" in categories:
+        priority += 0.1
+    return priority
 
 
 def _aggregate_categories(records: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:

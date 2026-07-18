@@ -114,6 +114,13 @@ failure lines, but the calibration gate is blocked: the validation set is below 
 30-sample minimum and no threshold achieved at least 50% coverage with selective CER <= 0.10. No
 threshold was applied to test and automatic acceptance remains disabled.
 
+The same private diagnostic emits a selection-complete labeling queue for every validation line,
+not only observed failures. It orders eight failure-targeted tasks before one coverage control but
+does not expose that selection signal, model text, publisher text, confidence, or failure category
+to annotators. Two blind passes are required per task and disagreement requires independent
+adjudication. The six-line test holdout is excluded. This is queue-readiness evidence; it does not
+claim that human annotation has occurred.
+
 ## GitHub Actions
 
 The manually dispatched `Baseline Predictions` workflow downloads a self-contained dataset

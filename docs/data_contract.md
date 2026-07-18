@@ -202,6 +202,11 @@ validation/test sample overlap. It keeps the sample-level failure atlas outside 
 separate aggregate diagnostic. Thresholds are searched on validation only and are applied once to
 the untouched test split only when the validation policy succeeds.
 
+The diagnostic also writes `blind_labeling_queue.private.jsonl`. It includes all validation samples
+for coverage, orders failure cases first, binds every task to the dataset/source hashes, requires two
+blind annotation passes and independent adjudication, and excludes test samples. It contains no
+reference, prediction, confidence, or failure-category field and must remain in owner-only storage.
+
 ## Build the manifest
 
 ```bash

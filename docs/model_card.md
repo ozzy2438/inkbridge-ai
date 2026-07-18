@@ -61,6 +61,9 @@ failures. A validation-only policy search found no confidence threshold that ret
 coverage while holding selective CER at or below 0.10. The validation set also falls below the
 predeclared 30-sample minimum for fitting confidence calibration, so no calibration parameters were
 created and all outputs remain routed to human review.
+That routing is now materialized as a private nine-task validation queue requiring 18 blind
+annotation assignments and independent adjudication on disagreement. The queue deliberately hides
+model/publisher text and excludes all six test-holdout samples. No human review result is claimed.
 The protected self-hosted evaluation gate is implemented, but it has run only on synthetic control
 data. Its sealed local-model producer has likewise been exercised only with a deterministic fake
 backend; neither contributes a model-quality result to this table.

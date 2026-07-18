@@ -51,6 +51,14 @@ search also required at least 50% validation coverage (5 lines) with selective C
 threshold was applied to the test holdout, and confidence parameters were not fitted. The resulting
 decision is deliberately fail-closed: **all predictions require human review**.
 
+The diagnostic now materializes that decision as a private, priority-ordered queue covering all
+nine validation lines. Eight failure-targeted tasks are followed by one coverage-control task, for
+18 required blind annotation assignments. The six test lines are excluded. Each task is bound to
+the dataset manifest and source hash, requires two independent passes plus adjudication on
+disagreement, and hides model text, publisher text, confidence, and failure categories from
+annotators. Human annotation has not been performed; the artifact proves queue readiness, not label
+completion.
+
 Latency was measured on CPU with Python 3.14.4, PyTorch 2.13.0, Transformers 4.57.6, macOS/Darwin
 27.0.0, and an arm64 machine. It is per-line model latency after load/warm-up, not page or class-set
 throughput. The six-line sample cannot support a production latency claim.
@@ -63,6 +71,7 @@ throughput. The six-line sample cannot support a production latency claim.
 - Validation prediction SHA-256: `d319b451b70f2d7e25dd43917c3833c7c2284d13afd57ffd1482ac11776b7fb9`
 - Test prediction SHA-256: `196250d38141dbaf43cf2171806c0f23eacf7e0e7419caf524d0f495ddf9a472`
 - Private failure-atlas SHA-256: `197911664dafe39aea85edfb984a2648970619132014cdab3c4034354d93abf2`
+- Private blind-labeling queue SHA-256: `b0860bd4694a4ed6128acacb0b8edf8c809ef125060bc338db9a869ffe4224a2`
 - Model package: 8 code-free files, 1,334,746,073 bytes, read-only, safetensors weights
 - Inference: local files only, no external AI service, outbound Python sockets blocked, no CI
 - Image processor: legacy/slow behavior explicitly locked with `use_fast=False`
@@ -73,9 +82,9 @@ classification output, but the warning is retained as a compatibility observatio
 is a development baseline, not a model-release certification.
 
 `result.json` is aggregate-only. The source images, references, writer IDs, normalized package,
-manifest, predictions, private failure atlas, and full local evaluation remain in owner-only
-storage outside Git. No sample-level SMHD artifact was uploaded to GitHub or processed by GitHub
-Actions.
+manifest, predictions, private failure atlas, blind-labeling queue, and full local evaluation remain
+in owner-only storage outside Git. No sample-level SMHD artifact was uploaded to GitHub or processed
+by GitHub Actions.
 
 ## Reproduce locally
 

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "captured",
-  "generated_at": "2026-07-18T04:49:47.736834+00:00",
+  "generated_at": "2026-07-18T05:13:42.769383+00:00",
   "evidence_scope": "noncommercial_research_rehearsal_only",
   "dataset": {
     "name": "smhd-research-rehearsal",
@@ -127,6 +127,20 @@
         "high_confidence_exact_error": 1
       }
     },
+    "labeling_queue": {
+      "private_sha256": "b0860bd4694a4ed6128acacb0b8edf8c809ef125060bc338db9a869ffe4224a2",
+      "validation_tasks": 9,
+      "failure_targeted_tasks": 8,
+      "coverage_control_tasks": 1,
+      "required_blind_annotation_assignments": 18,
+      "test_holdout_tasks_excluded": 6,
+      "double_blind_review_required": true,
+      "independent_adjudication_on_disagreement": true,
+      "model_predictions_visible": false,
+      "publisher_references_visible": false,
+      "failure_categories_visible": false,
+      "sample_level_artifacts_committed": false
+    },
     "calibration_gate": {
       "status": "blocked",
       "target": "exact_transcription_match",
@@ -161,6 +175,7 @@
     "protected_pilot_substitute": false,
     "primary_school_accuracy": false,
     "calibrated_confidence": false,
-    "automatic_acceptance_supported": false
+    "automatic_acceptance_supported": false,
+    "human_annotation_completed": false
   }
 }
