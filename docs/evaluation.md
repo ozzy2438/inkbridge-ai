@@ -92,6 +92,12 @@ advances that check to real adult handwriting: five test lines from two writer-i
 participants. Its prompt-derived references have not received independent human verification, so
 it remains pipeline evidence—not a gold set or a claim about child/student handwriting.
 
+The repository also contains a pinned adapter for a 12-writer, 36-line SMHD student-handwriting
+research rehearsal. Its normalized package and writer-isolated manifest must remain outside Git.
+The publisher references are unreviewed and CC BY-NC 4.0 limits use to non-commercial purposes, so
+any later offline prediction result must be labelled research-only. No SMHD prediction or metric is
+reported here yet, and such a run would not substitute for the protected-pilot gate.
+
 ## GitHub Actions
 
 The manually dispatched `Baseline Predictions` workflow downloads a self-contained dataset
@@ -102,6 +108,9 @@ Evaluation run and artifact can optionally be selected as the release baseline.
 GitHub-hosted inference is limited to public, licensed, de-identified data by an explicit dispatch
 attestation. The workflow is not an approved path for private student work. It also does not run
 automatically on pull requests, so routine CI never downloads model weights or evaluation images.
+The SMHD research package is deliberately excluded from hosted inference even though its source is
+public: its sample-level student references remain in local owner-only storage and its licence is
+non-commercial. Pull-request CI tests the adapter with generated fixture images only.
 
 ## Protected student evaluation
 

@@ -11,7 +11,7 @@ trained, evaluated, or published yet.
 - **Current checkpoint:** `microsoft/trocr-base-handwritten`
 - **Planned domain data:** SMHD + GNHK + IAM + controlled augmentations
 - **Parameters:** ~334M
-- **License:** MIT (model weights), CC-BY-NC (SMHD data)
+- **Model-weight license:** MIT; dataset licences remain separate
 
 ### Intended Use
 - Transcribing student handwritten essays and short answers
@@ -28,13 +28,14 @@ trained, evaluated, or published yet.
 
 ### Planned Training Data
 
-The datasets below are candidates. Their presence in this table does not mean that
-they have already been downloaded, transformed, split, or used for training.
+The datasets below are candidates. Their presence in this table does not mean that they have been
+approved for training or used to change the checkpoint. The SMHD adapter can produce a local,
+non-commercial research rehearsal package, but no SMHD model inference result is reported yet.
 
 | Dataset | Published scale | Purpose |
 |---------|-----------------|---------|
 | IAM | 13,353 lines | Standard benchmark |
-| SMHD | 500+ contributors | Student messy writing |
+| SMHD line version | 500+ contributors | Non-commercial student-handwriting research rehearsal |
 | GNHK | 9,363 lines | Camera-captured handwriting |
 | Augmented | Not generated yet | Robustness |
 
@@ -50,6 +51,9 @@ student-handwriting gold benchmark, model comparison, or release-gate baseline.
 
 Raw predictions, runtime/model provenance, manifest hashes, and evaluation reports are stored under
 `artifacts/smoke/`. No fine-tuned model or independently verified child/student result exists.
+The local-only SMHD adapter and manifest are preparation evidence, not an additional row in the
+results table: the publisher references are not independently reviewed and offline inference has
+not yet been run.
 The protected self-hosted evaluation gate is implemented, but it has run only on synthetic control
 data. Its sealed local-model producer has likewise been exercised only with a deterministic fake
 backend; neither contributes a model-quality result to this table.
@@ -61,6 +65,8 @@ an authorised real-student run.
 
 ### Ethical Considerations
 - No private student data is included in this public repository
+- The SMHD derivative and sample-level artifacts remain outside Git under owner-only permissions;
+  CC BY-NC 4.0 forbids commercial use
 - A future pilot must pass the protected governance and double-annotation gate; a software pass is
   not a legal/privacy certification
 - Abstention thresholds must be calibrated before operational use

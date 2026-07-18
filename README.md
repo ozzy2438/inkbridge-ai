@@ -14,7 +14,9 @@ heuristic image-quality and layout components, API scaffolding, an offline evalu
 harness, a resumable pretrained TrOCR prediction producer, and a fail-closed protected-pilot
 governance/double-annotation gate with sealed local-model inference and a writer-isolated,
 aggregate-only self-hosted evaluation path. The protected path also enforces an owner-only POSIX
-storage boundary and hash-chained consent-withdrawal/primary-and-backup-deletion evidence.
+storage boundary and hash-chained consent-withdrawal/primary-and-backup-deletion evidence. A
+separate fail-closed adapter now prepares a small, local-only SMHD student-handwriting research
+rehearsal without treating it as protected-pilot or gold-set evidence.
 
 The following claims are intentionally deferred until reproducible artifacts exist:
 
@@ -193,7 +195,7 @@ inkbridge-ai/
 | Dataset | Purpose | Size | License |
 |---------|---------|------|---------|
 | [IAM Handwriting Database](https://fki.tic.heia-fr.ch/databases/iam-handwriting-database) | Standard benchmark & baseline | 13,353 lines, 657 writers | Research |
-| [SMHD](https://doi.org/10.25439/rmt.24312715.v1) | Student essays, cross-outs, corrections | 500+ students, essays & math | CC BY-NC 4.0 |
+| [SMHD line version](https://doi.org/10.25439/rmt.24419986.v1) | Local-only student-handwriting research rehearsal | Pinned 12-writer, 36-line subset | CC BY-NC 4.0 |
 | [GNHK](https://github.com/GoodNotes/GNHK-dataset) | Camera-captured, varied conditions | 687 images, 9,363 lines | CC BY 4.0 |
 | [OpenHand-Synth](https://huggingface.co/datasets/to-be/OpenHand-Synth) | Synthetic pipeline smoke test only | Pinned 27-line subset | CC BY 4.0 |
 | [CSAFE Handwriting Database](https://doi.org/10.25380/iastate.10062203.v2) | Real adult-handwriting pipeline smoke test only | Pinned 9-writer, 19-line subset | CC BY 4.0 |
@@ -202,8 +204,9 @@ inkbridge-ai/
 
 See the [dataset contract](docs/data_contract.md) for normalized labels, provenance fields,
 source hashing, the reproducible public smoke subsets, and deterministic writer-independent split
-generation. Synthetic and adult-handwriting smoke results are plumbing evidence, not
-student-handwriting benchmarks.
+generation. The local SMHD subset reaches real student handwriting but remains non-commercial,
+unreviewed research preparation; synthetic, adult-handwriting, and SMHD preparation evidence are
+not student-handwriting gold benchmarks.
 
 The [protected student-pilot gate](docs/pilot_governance.md) defines the separate path for consented
 child/student data. Its template is intentionally unapproved; no private data or consent record is
@@ -247,7 +250,9 @@ The repository contains a
 [captured synthetic TrOCR smoke result](artifacts/smoke/openhand-synth-trocr-base-v1/README.md)
 and a [captured real adult-handwriting smoke result](artifacts/smoke/csafe-real-trocr-base-v1/README.md)
 that prove the pipeline runs end to end. Both are deliberately excluded from student-handwriting
-benchmark claims; the next evidence level requires independently verified child/student gold data.
+benchmark claims. A local-only SMHD research manifest is now ready for a later offline baseline
+run, but no SMHD metric is claimed; the next gold evidence level still requires independently
+verified, authorised child/student data.
 
 | Category | Metrics |
 |----------|--------|

@@ -101,6 +101,67 @@ python -m scripts.build_dataset_manifest \
   --min-samples-per-writer 1
 ```
 
+## Licensed student-handwriting research rehearsal
+
+The SMHD line-version adapter is the first checkpoint that represents the target domain: scanned
+student handwriting with corrections, cross-outs, and insertions. The official RMIT Figshare
+article, archive file, CC BY-NC 4.0 licence, archive byte hashes, ZIP inventory, three transcription
+indexes, and record counts are pinned in
+`configs/datasets/smhd_research_rehearsal.json`. The adapter accepts an already downloaded local
+archive only; it does not download data or accept licence terms for the operator.
+
+The archive and normalized package must remain outside the repository in owner-only directories.
+The adapter rejects group/world-accessible source storage, repository-contained source or output
+paths, archive/hash/inventory drift, unsafe ZIP paths, encrypted entries, symlinks, missing indexed
+images, oversized source images, and any spec that describes the references as gold or the package
+as production-pilot evidence.
+
+After independently obtaining the exact official `SMHD-lines.zip` file, prepare the locked subset:
+
+```bash
+python -m scripts.prepare_smhd_research_subset \
+  --archive /private/research/smhd-line-v1/source/SMHD-lines.zip \
+  --output-dir /private/research/smhd-line-v1/normalized-v1 \
+  --repository-root .
+```
+
+The selection contains 12 writers and three lines per writer. Every writer contributes at least one
+line with the publisher's `#` correction/cross-out marker and at least one without it. Writers and
+samples are chosen by a fixed SHA-256 ranking, so no source IDs or transcriptions are stored in the
+repository specification. Images are decoded, converted to metadata-free grayscale PGM, and
+renamed; source writer IDs are replaced with deterministic pseudonyms before `labels.csv` is
+written.
+
+For OCR references, the adapter removes only the publisher's `#` annotation characters and
+collapses whitespace. It does not otherwise correct the publisher transcription. These labels have
+not received independent transcription or crop-boundary review, so `gold_ready` remains false.
+Pseudonyms remain linkable to the public source and are not anonymisation.
+
+Build the local, writer-isolated manifest under a restrictive process umask:
+
+```bash
+umask 077
+python -m scripts.build_dataset_manifest \
+  --dataset-dir /private/research/smhd-line-v1/normalized-v1 \
+  --output-dir /private/research/smhd-line-v1/normalized-v1 \
+  --dataset-name smhd-research-rehearsal \
+  --dataset-version figshare-24419986-v1-selection-v1 \
+  --license-id CC-BY-NC-4.0 \
+  --license-url https://creativecommons.org/licenses/by-nc/4.0/ \
+  --sample-type line \
+  --train-ratio 0.6 \
+  --val-ratio 0.2 \
+  --test-ratio 0.2 \
+  --seed 42 \
+  --min-samples-per-writer 3
+```
+
+This is a non-commercial, offline research rehearsal. It is not a consented production pilot,
+commercial-use evidence, a child/primary-school benchmark, or an approved training set. Do not
+commit its normalized data, labels, manifest, predictions, or sample-level evaluation artifacts;
+do not send them through GitHub-hosted Actions. A later offline inference run must preserve these
+boundaries and report its result separately from protected-pilot evidence.
+
 ## Build the manifest
 
 ```bash
