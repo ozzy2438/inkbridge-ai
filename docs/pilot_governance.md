@@ -89,8 +89,9 @@ The audit status is `gold_candidate_ready`, while `gold_ready` remains false. Th
 1. revalidates the approved package against its persisted intake audit;
 2. creates a versioned manifest with disjoint validation and locked-test writers;
 3. writes no training split and makes the manifest and metadata read-only;
-4. rejects hosted CI, reference-bearing prediction exports, and external-AI attestations;
-5. joins protected references only in memory and persists aggregate metrics only.
+4. binds a short-lived approval to a sealed local model and exact inference settings;
+5. rejects hosted CI, reference-bearing prediction exports, and external-AI execution;
+6. joins protected references only in memory and persists aggregate metrics only.
 
 The remaining operational work is to connect an approved private storage/access-control system,
 run an authorised real pilot on self-hosted inference, and record withdrawal/deletion events across

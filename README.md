@@ -12,8 +12,8 @@ InkBridge AI is currently an **alpha research and engineering prototype**, not a
 production deployment. The repository contains a baseline TrOCR inference path,
 heuristic image-quality and layout components, API scaffolding, an offline evaluation
 harness, a resumable pretrained TrOCR prediction producer, and a fail-closed protected-pilot
-governance/double-annotation gate with a writer-isolated, aggregate-only self-hosted evaluation
-path.
+governance/double-annotation gate with sealed local-model inference and a writer-isolated,
+aggregate-only self-hosted evaluation path.
 
 The following claims are intentionally deferred until reproducible artifacts exist:
 
@@ -135,6 +135,7 @@ inkbridge-ai/
 │   ├── evaluation/             # Evaluation framework
 │   │   ├── metrics.py          # CER, WER, calibration
 │   │   ├── runner.py           # Artifact validation and release gates
+│   │   ├── protected_inference.py # Sealed-model protected producer
 │   │   └── failure_atlas.py    # Failure categorization
 │   ├── data/                   # Data processing
 │   │   ├── manifest.py         # Licensed provenance and split manifests
@@ -159,6 +160,7 @@ inkbridge-ai/
 │   ├── prepare_datasets.py
 │   ├── run_evaluation.py
 │   ├── run_baseline_inference.py
+│   ├── run_protected_inference.py
 │   └── export_onnx.py
 ├── docker/                     # Docker configuration
 │   ├── Dockerfile
@@ -203,7 +205,8 @@ The [protected student-pilot gate](docs/pilot_governance.md) defines the separat
 child/student data. Its template is intentionally unapproved; no private data or consent record is
 included in this repository. After approval, the
 [protected evaluation contract](docs/protected_evaluation.md) freezes validation/test writers and
-evaluates reference-free predictions locally without exporting sample-level content.
+uses a sealed, preloaded local TrOCR artifact to produce and evaluate reference-free predictions
+without exporting sample-level content.
 
 ## 🔬 Model Architecture
 
@@ -262,7 +265,8 @@ benchmark claims; the next evidence level requires independently verified child/
 ## 📋 Roadmap
 
 - [ ] Week 1-2: Problem discovery, data governance, locked gold set, baselines
-  **(governance, freeze/self-hosted eval gates, and smoke baselines complete; real consented gold pending)**
+  **(governance, freeze/sealed-inference/self-hosted eval gates, and smoke baselines complete;
+  real consented gold and infrastructure evidence pending)**
 - [ ] Week 3-4: Quality gate, layout segmentation, TrOCR baseline **(prototype implemented; validation pending)**
 - [ ] Week 5-6: Domain fine-tuning, failure analysis, calibration
 - [ ] Week 7: VLM fallback & structured JSON SFT

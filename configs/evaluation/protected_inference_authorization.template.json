@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "status": "pending",
+  "approval_reference": "replace_me",
+  "approved_at": "replace_me",
+  "expires_at": "replace_me",
+  "accountable_owner_role": "replace_me",
+  "operator_role": "replace_me",
+  "execution_environment": "approved_self_hosted",
+  "evaluation_set_id": "replace_me",
+  "manifest_sha256": "replace_me",
+  "model_version": "replace_me",
+  "model_artifact_sha256": "replace_me",
+  "device": "cpu",
+  "inference_config": {
+    "batch_size": 8,
+    "beam_width": 4,
+    "max_length": 128,
+    "confidence_threshold": 0.7,
+    "abstention_threshold": 0.4,
+    "dtype": "float32"
+  },
+  "prediction_schema": "inkbridge-reference-free-v1",
+  "protected_storage_required": true,
+  "network_access_during_inference": false,
+  "external_ai_services_allowed": false,
+  "github_actions_allowed": false,
+  "model_artifacts_preloaded": false,
+  "training_allowed": false,
+  "automated_decisions_allowed": false
+}

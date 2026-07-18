@@ -143,8 +143,10 @@ image metadata, and two blind human transcriptions with independent adjudication
 Passing produces `gold_candidate_ready`, not `gold_ready`. Once the candidate population is
 owner-approved and the split-access policy is recorded, the separate
 [protected evaluation contract](protected_evaluation.md) can freeze a read-only, versioned
-validation/test manifest with writer isolation and no training split. The public dataset manifest
-examples above do not grant permission to process student data.
+validation/test manifest with writer isolation and no training split. Protected inference then
+requires a sealed local safetensors artifact and short-lived authorization bound to the exact
+model, manifest, device, and inference settings. The public dataset manifest examples above do not
+grant permission to process student data.
 
 ## Hosted workflow boundary
 

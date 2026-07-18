@@ -58,6 +58,7 @@ class TrOCREngine:
         batch_size: int = 16,
         revision: str | None = None,
         model_version: str | None = None,
+        local_files_only: bool = False,
     ):
         self.model_path = model_path
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
@@ -70,6 +71,7 @@ class TrOCREngine:
             raise ValueError("batch_size must be at least 1")
         self.batch_size = batch_size
         self.revision = revision
+        self.local_files_only = local_files_only
 
         self._model = None
         self._processor = None
@@ -89,10 +91,14 @@ class TrOCREngine:
         logger.info("trocr.loading", model_path=self.model_path, device=self.device)
 
         self._processor = TrOCRProcessor.from_pretrained(
-            self.model_path, revision=self.revision
+            self.model_path,
+            revision=self.revision,
+            local_files_only=self.local_files_only,
         )
         self._model = VisionEncoderDecoderModel.from_pretrained(
-            self.model_path, revision=self.revision
+            self.model_path,
+            revision=self.revision,
+            local_files_only=self.local_files_only,
         )
 
         if self.use_fp16:

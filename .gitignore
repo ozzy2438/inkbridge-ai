@@ -32,6 +32,9 @@ protected_evaluation_results/
 protected_evaluation.manifest.jsonl
 protected_evaluation.manifest.meta.json
 execution_attestation.json
+protected_inference_authorization.json
+protected_prediction_state.json
+predictions.partial.jsonl
 model_cache/
 checkpoints/
 onnx_models/

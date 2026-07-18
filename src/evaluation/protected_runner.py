@@ -15,6 +15,7 @@ from src.data.protected_manifest import (
     METADATA_FILENAME,
     verify_frozen_protected_evaluation,
 )
+from src.evaluation.protected_runtime import reject_ci_environment
 from src.evaluation.runner import (
     EvaluationRecord,
     evaluate_records,
@@ -36,8 +37,11 @@ _ATTESTATION_FIELDS = {
     "execution_environment",
     "executed_at",
     "operator_role",
+    "approval_reference",
+    "inference_authorization_sha256",
     "model_version",
     "model_artifact_sha256",
+    "inference_config_sha256",
     "evaluation_set_id",
     "manifest_sha256",
     "predictions_sha256",
@@ -49,14 +53,6 @@ _ATTESTATION_FIELDS = {
     "predictions_contain_references",
     "automated_decisions_enabled",
 }
-_CI_ENVIRONMENT_MARKERS = (
-    "BUILDKITE",
-    "CIRCLECI",
-    "GITHUB_ACTIONS",
-    "GITLAB_CI",
-    "JENKINS_URL",
-    "TF_BUILD",
-)
 
 
 def run_protected_evaluation(
@@ -74,7 +70,7 @@ def run_protected_evaluation(
     repository_root: str | Path | None = None,
 ) -> tuple[dict[str, Any], Path]:
     """Join reference-free predictions in memory and persist only aggregate metrics."""
-    _reject_ci_environment()
+    reject_ci_environment("Protected evaluation")
     safe_model_version = _safe_component(model_version, "model_version")
     metadata, manifest_records = verify_frozen_protected_evaluation(
         contract_path,
@@ -134,7 +130,12 @@ def run_protected_evaluation(
         "manifest_sha256": manifest_sha256,
         "manifest_metadata_sha256": sha256_file(Path(manifest_dir) / METADATA_FILENAME),
         "execution_attestation_sha256": hashlib.sha256(attestation_content).hexdigest(),
+        "approval_reference": attestation_value["approval_reference"],
+        "inference_authorization_sha256": attestation_value[
+            "inference_authorization_sha256"
+        ],
         "model_artifact_sha256": attestation_value["model_artifact_sha256"],
+        "inference_config_sha256": attestation_value["inference_config_sha256"],
         "aggregate_only": True,
         "sample_level_output_persisted": False,
         "references_exported": False,
@@ -250,7 +251,10 @@ def _validate_attestation(
         raise ValueError("Execution attestation manifest_sha256 does not match")
     if value.get("predictions_sha256") != predictions_sha256:
         raise ValueError("Execution attestation predictions_sha256 does not match")
+    _approval_reference(value, "approval_reference")
+    _required_sha256(value, "inference_authorization_sha256", "attestation")
     _required_sha256(value, "model_artifact_sha256", "attestation")
+    _required_sha256(value, "inference_config_sha256", "attestation")
     _verified_timestamp(value, "executed_at")
     operator_role = _required_string(value, "operator_role", "attestation")
     if (
@@ -291,21 +295,6 @@ def _validate_protected_baseline(
     for key, expected in required.items():
         if protected.get(key) != expected:
             raise ValueError(f"Baseline protected_evaluation.{key} does not match")
-
-
-def _reject_ci_environment() -> None:
-    active = [name for name in _CI_ENVIRONMENT_MARKERS if _environment_truthy(name)]
-    if _environment_truthy("CI"):
-        active.append("CI")
-    if active:
-        raise RuntimeError(
-            "Protected evaluation refuses CI environments; active markers=" + ",".join(active)
-        )
-
-
-def _environment_truthy(name: str) -> bool:
-    value = os.getenv(name)
-    return value is not None and value.strip().casefold() not in {"", "0", "false", "no"}
 
 
 def _required_protected_file(path: str | Path, root: Path, name: str, label: str) -> Path:
@@ -406,6 +395,13 @@ def _required_sha256(value: Mapping[str, Any], key: str, context: str) -> str:
     item = _required_string(value, key, context)
     if len(item) != 64 or any(character not in "0123456789abcdef" for character in item):
         raise ValueError(f"{context}.{key} must be a lowercase SHA-256 digest")
+    return item
+
+
+def _approval_reference(value: Mapping[str, Any], key: str) -> str:
+    item = _required_string(value, key, "attestation")
+    if re.fullmatch(r"[a-z][a-z0-9_-]{7,127}", item) is None:
+        raise ValueError(f"attestation.{key} must be an opaque internal reference")
     return item
 
 

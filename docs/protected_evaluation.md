@@ -60,29 +60,71 @@ manifest and all hashes before reading predictions.
 
 ## 3. Produce reference-free predictions
 
-Run the approved, preloaded model locally against only the manifest's `test` images. The producer
-must write `/protected/inkbridge/pilot-001/runs/<model>/predictions.jsonl` with exactly:
+Materialise the approved TrOCR model outside Git as a self-contained directory. It must contain
+`config.json`, `preprocessor_config.json`, and safetensors weights; symbolic links, executable
+files, pickle-based weights, cached Hub state, and remote Python code are refused. Seal the model
+before use and record its deterministic identity:
 
-```json
-{"sample_id":"sample-<opaque-hex>","source_sha256":"<64 hex>","prediction":"raw model text"}
+```bash
+chmod -R a-w /protected/inkbridge/models/trocr-v1
+python -m scripts.hash_local_model_artifact \
+  --model-dir /protected/inkbridge/models/trocr-v1
 ```
 
-`confidence`, `latency_ms`, and `cost_per_page_usd` are optional, but each supplied field must be
-present for every record. Do not add `reference`, `writer_id`, `slices`, or image paths. The gate
-requires every test sample exactly once and rejects validation samples, unknown samples, duplicate
-IDs, missing rows, and source-hash drift.
+Copy `configs/evaluation/protected_inference_authorization.template.json` to
+`/protected/inkbridge/pilot-001/protected_inference_authorization.json`. The template is
+deliberately invalid. An authorised owner must set `status` to `approved`, bind the frozen
+evaluation/manifest and exact model hash, approve the device and every inference setting, set
+`model_artifacts_preloaded` to `true`, and give the approval a validity window of at most 30 days.
+Then remove all write permission bits from the authorization file.
 
-## 4. Attest the execution boundary
+Run the producer on the approved self-hosted machine:
 
-Copy `configs/evaluation/protected_execution_attestation.template.json` beside the prediction file
-as `execution_attestation.json`. The repository template is intentionally invalid. The approved
-operator must bind the exact model version, evaluation-set ID, and manifest hash, then truthfully
-attest the prediction-file hash and preloaded model-artifact hash. They must also truthfully attest
-that protected storage was mounted, networking/external AI/GitHub Actions were unused, predictions
-contain no references, and no automated educational decision was enabled.
+```bash
+python -m scripts.run_protected_inference \
+  --contract /protected/inkbridge/pilot-001/pilot_intake.json \
+  --dataset-dir /protected/inkbridge/pilot-001 \
+  --manifest-dir /protected/inkbridge/pilot-001/frozen_evaluation \
+  --authorization /protected/inkbridge/pilot-001/protected_inference_authorization.json \
+  --model-dir /protected/inkbridge/models/trocr-v1 \
+  --output-dir /protected/inkbridge/pilot-001/runs/trocr-v1 \
+  --device cpu \
+  --batch-size 8 \
+  --beam-width 4 \
+  --max-length 128 \
+  --confidence-threshold 0.7 \
+  --abstention-threshold 0.4
+```
 
-The attestation records an asserted control. The code cannot independently prove that networking
-was disabled or that the named operator had authority; infrastructure audit logs remain required.
+Every CLI setting must exactly match the sealed authorization. The producer refuses CI before
+opening data, revalidates the frozen manifest, reads only locked `test` images, verifies each image
+hash before decoding, loads the local model with Transformers offline mode, and blocks new Python
+socket connections during inference. It fsyncs resumable progress after each batch and atomically
+publishes a read-only run only after every test sample is complete and all input/model hashes still
+match.
+
+`predictions.jsonl` contains exactly:
+
+```json
+{"confidence":0.8,"latency_ms":12.5,"prediction":"raw model text","sample_id":"sample-<opaque-hex>","source_sha256":"<64 hex>"}
+```
+
+It cannot contain `reference`, writer ID, slices, image paths, cost, routing decisions, or any other
+field. The producer rejects validation samples, unknown or duplicate IDs, missing rows, source-hash
+drift, changed authorization/model bytes, and provenance that differs from the approved settings.
+
+## 4. Verify the generated execution evidence
+
+The producer writes `execution_attestation.json`; operators must not hand-edit it. It binds the
+approval reference and authorization hash, canonical inference-configuration hash, exact local
+model artifact, frozen evaluation set/manifest, and prediction-file hash. The repository's
+`protected_execution_attestation.template.json` is retained only as an intentionally invalid schema
+example.
+
+Offline library flags and the Python socket guard are defence in depth, not an independently
+verified network perimeter. The attestation and permission checks cannot prove the operator's
+authority, storage mount, host firewall, subprocess/native-library behaviour, or infrastructure
+audit trail. Those controls still require evidence from the approved environment.
 
 ## 5. Run aggregate-only evaluation
 
@@ -107,7 +149,8 @@ performance remain protected pilot provenance and require owner review before di
 ## What this does not yet prove
 
 - No real student package or model run exists in this repository.
-- A three-writer synthetic rehearsal proves control flow, not statistical adequacy.
+- A synthetic fake-backend rehearsal proves producer/evaluator control flow, not model quality or
+  statistical adequacy.
 - `gold_ready` remains false; this path does not choose the final population or certify coverage.
 - It does not implement storage IAM, encryption, audit-log collection, backup deletion, or consent
   withdrawal orchestration.
