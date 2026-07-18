@@ -77,17 +77,25 @@ GitHub Actions; the audit hashes still describe sensitive data and remain protec
 - Indexed images exactly match `images/`, contain no EXIF/text metadata, and cannot be symlinks.
 - Every final transcript has two blind passes and a crop review.
 - Disagreement requires an independent adjudicator, controlled reason, and recorded time.
-- At least three writers are required so a later train/validation/test split can be writer-isolated.
+- At least three writers are required so later validation/test groups can be writer-isolated.
+- The evaluation-set version, deterministic seed, validation/test writer ratios, and minimum
+  samples per writer are approved in the contract before the split is revealed.
 
 ## What remains after a pass
 
-The audit status is `gold_candidate_ready`, while `gold_ready` remains false. The next gate must:
+The audit status is `gold_candidate_ready`, while `gold_ready` remains false. The implemented
+[protected evaluation gate](protected_evaluation.md) then:
 
-1. obtain explicit owner approval for the final candidate population;
-2. create and freeze a versioned writer-isolated manifest;
-3. deny training, prompt selection, and threshold tuning access to the locked test split;
-4. run evaluation only on protected/self-hosted infrastructure;
-5. record withdrawal/deletion events across primary storage and backups.
+1. revalidates the approved package against its persisted intake audit;
+2. creates a versioned manifest with disjoint validation and locked-test writers;
+3. writes no training split and makes the manifest and metadata read-only;
+4. rejects hosted CI, reference-bearing prediction exports, and external-AI attestations;
+5. joins protected references only in memory and persists aggregate metrics only.
+
+The remaining operational work is to connect an approved private storage/access-control system,
+run an authorised real pilot on self-hosted inference, and record withdrawal/deletion events across
+primary storage and backups. A frozen pilot set still reports `gold_ready: false`; size, coverage,
+owner acceptance, and evaluation evidence must be reviewed before any final gold or release claim.
 
 No real student image, transcript, manifest, consent record, or annotation review is committed to
 this public repository.

@@ -62,6 +62,11 @@
   },
   "gold": {
     "minimum_distinct_writers": 3,
+    "evaluation_set_version": "v1",
+    "split_seed": 42,
+    "validation_writer_ratio": 0.5,
+    "test_writer_ratio": 0.5,
+    "minimum_samples_per_writer": 1,
     "writer_isolation_required": true,
     "split_locked_before_model_selection": true,
     "test_set_training_access_allowed": false,

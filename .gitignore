@@ -27,6 +27,11 @@ data/pilot/
 pilot_intake.json
 annotation_review.csv
 pilot_intake.audit.json
+frozen_evaluation/
+protected_evaluation_results/
+protected_evaluation.manifest.jsonl
+protected_evaluation.manifest.meta.json
+execution_attestation.json
 model_cache/
 checkpoints/
 onnx_models/

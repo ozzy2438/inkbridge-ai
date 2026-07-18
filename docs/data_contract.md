@@ -140,9 +140,11 @@ Private child/student data must first pass the
 consent evidence, repository-external protected storage, opaque sample/writer identifiers, stripped
 image metadata, and two blind human transcriptions with independent adjudication on disagreement.
 
-Passing produces `gold_candidate_ready`, not `gold_ready`. Do not build or freeze a private gold
-manifest until the candidate population is owner-approved and the split-access policy is in place.
-The public dataset manifest examples above do not grant permission to process student data.
+Passing produces `gold_candidate_ready`, not `gold_ready`. Once the candidate population is
+owner-approved and the split-access policy is recorded, the separate
+[protected evaluation contract](protected_evaluation.md) can freeze a read-only, versioned
+validation/test manifest with writer isolation and no training split. The public dataset manifest
+examples above do not grant permission to process student data.
 
 ## Hosted workflow boundary
 
@@ -151,4 +153,5 @@ The `Baseline Predictions` GitHub workflow accepts only a package whose root con
 explicit attestation to public, licensed, de-identified line data. Pseudonymous writer IDs and
 references can still be sensitive; do not upload private pilot or student work as a GitHub
 artifact. Private evaluation requires protected storage and a controlled/self-hosted execution
-path, which this repository does not yet provide.
+path. The repository now provides a fail-closed local contract for that path, but it does not
+provide or certify the private storage, access controls, offline inference host, or real pilot data.

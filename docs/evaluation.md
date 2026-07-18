@@ -102,3 +102,11 @@ Evaluation run and artifact can optionally be selected as the release baseline.
 GitHub-hosted inference is limited to public, licensed, de-identified data by an explicit dispatch
 attestation. The workflow is not an approved path for private student work. It also does not run
 automatically on pull requests, so routine CI never downloads model weights or evaluation images.
+
+## Protected student evaluation
+
+Private student handwriting uses the separate
+[protected self-hosted evaluation contract](protected_evaluation.md). It freezes disjoint
+validation/test writers outside Git, accepts a reference-free prediction allowlist, refuses hosted
+CI and external-AI attestations, and persists aggregate metrics only. The ordinary hosted workflows
+and `scripts.run_evaluation` command are not approved substitutes for this protected path.

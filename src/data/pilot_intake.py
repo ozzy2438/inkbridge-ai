@@ -279,6 +279,23 @@ def _validate_contract(contract: Mapping[str, Any]) -> None:
     minimum = _required_positive_int(gold, "minimum_distinct_writers", "gold")
     if minimum < 3:
         raise ValueError("gold.minimum_distinct_writers must be at least 3")
+    evaluation_set_version = _required_string(gold, "evaluation_set_version", "gold")
+    if re.fullmatch(r"v[1-9][0-9]{0,5}", evaluation_set_version) is None:
+        raise ValueError("gold.evaluation_set_version must match v<positive integer>")
+    split_seed = gold.get("split_seed")
+    if (
+        isinstance(split_seed, bool)
+        or not isinstance(split_seed, int)
+        or not 0 <= split_seed <= 2**32 - 1
+    ):
+        raise ValueError("gold.split_seed must be an unsigned 32-bit integer")
+    minimum_samples = _required_positive_int(gold, "minimum_samples_per_writer", "gold")
+    if minimum_samples > 1000:
+        raise ValueError("gold.minimum_samples_per_writer must not exceed 1000")
+    validation_ratio = _required_ratio(gold, "validation_writer_ratio", "gold")
+    test_ratio = _required_ratio(gold, "test_writer_ratio", "gold")
+    if not abs(validation_ratio + test_ratio - 1.0) <= 1e-9:
+        raise ValueError("gold validation and test writer ratios must sum to 1")
     for key in ("writer_isolation_required", "split_locked_before_model_selection"):
         _require_bool(gold, key, True, "gold")
     for key in ("test_set_training_access_allowed", "gold_ready"):
@@ -528,6 +545,16 @@ def _required_positive_int(value: Mapping[str, Any], key: str, context: str) -> 
     if isinstance(result, bool) or not isinstance(result, int) or result <= 0:
         raise ValueError(f"{context}.{key} must be a positive integer")
     return result
+
+
+def _required_ratio(value: Mapping[str, Any], key: str, context: str) -> float:
+    result = value.get(key)
+    if isinstance(result, bool) or not isinstance(result, (int, float)):
+        raise ValueError(f"{context}.{key} must be numeric")
+    ratio = float(result)
+    if not 0 < ratio < 1:
+        raise ValueError(f"{context}.{key} must be between 0 and 1")
+    return ratio
 
 
 def _require_exact(value: Mapping[str, Any], key: str, expected: Any, context: str) -> None:

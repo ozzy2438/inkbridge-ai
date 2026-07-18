@@ -119,6 +119,11 @@ def _approved_contract() -> dict[str, Any]:
         },
         "gold": {
             "minimum_distinct_writers": 3,
+            "evaluation_set_version": "v1",
+            "split_seed": 42,
+            "validation_writer_ratio": 0.5,
+            "test_writer_ratio": 0.5,
+            "minimum_samples_per_writer": 1,
             "writer_isolation_required": True,
             "split_locked_before_model_selection": True,
             "test_set_training_access_allowed": False,
@@ -218,6 +223,16 @@ def test_protected_pilot_gate_rejects_pending_approval(tmp_path: Path) -> None:
     contract_path.write_text(json.dumps(contract), encoding="utf-8")
 
     with pytest.raises(ValueError, match="privacy_review_status"):
+        validate_protected_pilot(contract_path, dataset, repository_root=repository)
+
+
+def test_protected_pilot_gate_rejects_invalid_writer_split_contract(tmp_path: Path) -> None:
+    repository, dataset, contract_path, _ = _fixture(tmp_path)
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["gold"]["test_writer_ratio"] = 0.6
+    contract_path.write_text(json.dumps(contract), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="ratios must sum to 1"):
         validate_protected_pilot(contract_path, dataset, repository_root=repository)
 
 

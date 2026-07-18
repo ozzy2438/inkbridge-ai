@@ -50,6 +50,8 @@ student-handwriting gold benchmark, model comparison, or release-gate baseline.
 
 Raw predictions, runtime/model provenance, manifest hashes, and evaluation reports are stored under
 `artifacts/smoke/`. No fine-tuned model or independently verified child/student result exists.
+The protected self-hosted evaluation gate is implemented, but it has run only on synthetic control
+data; it contributes no model-quality result to this table.
 
 ### Ethical Considerations
 - No private student data is included in this public repository

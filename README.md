@@ -12,7 +12,8 @@ InkBridge AI is currently an **alpha research and engineering prototype**, not a
 production deployment. The repository contains a baseline TrOCR inference path,
 heuristic image-quality and layout components, API scaffolding, an offline evaluation
 harness, a resumable pretrained TrOCR prediction producer, and a fail-closed protected-pilot
-governance and double-annotation gate.
+governance/double-annotation gate with a writer-isolated, aggregate-only self-hosted evaluation
+path.
 
 The following claims are intentionally deferred until reproducible artifacts exist:
 
@@ -200,7 +201,9 @@ student-handwriting benchmarks.
 
 The [protected student-pilot gate](docs/pilot_governance.md) defines the separate path for consented
 child/student data. Its template is intentionally unapproved; no private data or consent record is
-included in this repository.
+included in this repository. After approval, the
+[protected evaluation contract](docs/protected_evaluation.md) freezes validation/test writers and
+evaluates reference-free predictions locally without exporting sample-level content.
 
 ## 🔬 Model Architecture
 
@@ -225,10 +228,11 @@ included in this repository.
 
 The offline evaluator validates prediction JSONL artifacts, hashes its inputs, and computes the
 implemented metrics below. A separate producer can now capture pretrained TrOCR predictions from a
-licensed line-level manifest. The repository still has no real model
-benchmark report because a locked, writer-isolated real handwriting gold set has not yet been
-published. See the [evaluation contract](docs/evaluation.md) for the input schema and release-gate
-workflow.
+licensed line-level manifest. The repository still has no child/student model benchmark because no
+authorised, independently verified protected pilot has been run. See the
+[evaluation contract](docs/evaluation.md) for the public input schema and release-gate workflow,
+and the [protected evaluation contract](docs/protected_evaluation.md) for private shadow
+evaluation.
 
 The repository contains a
 [captured synthetic TrOCR smoke result](artifacts/smoke/openhand-synth-trocr-base-v1/README.md)
@@ -258,7 +262,7 @@ benchmark claims; the next evidence level requires independently verified child/
 ## 📋 Roadmap
 
 - [ ] Week 1-2: Problem discovery, data governance, locked gold set, baselines
-  **(governance gate and smoke baselines complete; consented gold pending)**
+  **(governance, freeze/self-hosted eval gates, and smoke baselines complete; real consented gold pending)**
 - [ ] Week 3-4: Quality gate, layout segmentation, TrOCR baseline **(prototype implemented; validation pending)**
 - [ ] Week 5-6: Domain fine-tuning, failure analysis, calibration
 - [ ] Week 7: VLM fallback & structured JSON SFT
